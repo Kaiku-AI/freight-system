@@ -7,6 +7,8 @@ import { useCallback, useEffect, useState } from "react";
 import { deleteJob, getJobs, type JobFilters } from "@/lib/api";
 import type { Job } from "@/types/job";
 
+import { STATUS_OPTIONS, fmtDate, statusLabel } from "./fields";
+
 const PAGE_SIZE = 20;
 
 // 文本筛选项——对齐列表列与后端 GET /api/jobs（DESIGN §5）。
@@ -19,19 +21,9 @@ const TEXT_FILTERS = [
   { key: "final_destination", label: "目的地" },
 ] as const;
 
-// 出运状态 draft/active/closed（DESIGN §4），列表/筛选用中文显示。
-const STATUS_OPTIONS = [
-  { value: "draft", label: "草稿" },
-  { value: "active", label: "出运中" },
-  { value: "closed", label: "已关闭" },
-];
-const statusLabel = (s?: string | null) =>
-  STATUS_OPTIONS.find((o) => o.value === s)?.label ?? s ?? "-";
-
-const fmtDate = (s?: string | null) => (s ? s.slice(0, 10) : "-");
 const flag = (b: boolean) => (b ? "✓" : "—");
 
-export default function JobsClient() {
+export default function JobListClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
 

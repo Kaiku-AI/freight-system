@@ -42,6 +42,9 @@ PROGRESS.md 进度与分步计划
 - **唯一 auth gate 在 `components/AppShell.tsx`**（客户端）：受保护页未登录跳 `/login`，已登录访问 `/login` 跳主页；登录页在 `PUBLIC_PATHS` 裸渲染、不套导航。persist 水合前用 `mounted` 门控（return null）防首帧误跳。新增「shell 外」公开页改 `PUBLIC_PATHS`，别在各页面各自写 gate。
 - **服务端取数统一走 `lib/api.ts`**：所有 `/api/*` 请求经 `request` helper（抛后端 `detail`、204 返 undefined），页面只调 `getJobs/getJob/createJob/updateJob/deleteJob`，不在组件里裸写 fetch；写操作成功后手动重拉列表。
 - **用 `useSearchParams` 的客户端页面必须包 `<Suspense>`**（Next 16 硬要求，否则 build 报错）：约定「服务端壳 `page.tsx` 套 Suspense → `_components/XxxClient.tsx` 客户端组件」。列表筛选/分页参数放 URL query（表单 `name` → `router.push`），不进全局 store。
+- **大表单字段元数据驱动**：作业表单/明细的 ~75 字段不手写逐个 input，由 `app/jobs/_components/fields.ts` 的 `FieldDef[]`（name/label/type/required/options/full）单一数据源渲染（新建表单 `JobForm.tsx`、只读明细 `JobDetailClient.tsx` 共用）；改/加字段只动 fields.ts（并同步 `types/job.ts` 与后端）。表单纯函数（`initialFormState`/`missingRequired`/`buildJobPayload`）也放 fields.ts、与 React 解耦，便于 Vitest 单测。必填项黄底红星由 `FieldDef.required` 派生。
+- **Supabase 连接必开 `pool_pre_ping`**（`backend/db.py`，非 SQLite）：pgbouncer 连接池回收空闲连接后会留死连接，复用即「SSL SYSCALL error: EOF detected」500；取用前探活自动重连。serverless/长闲置场景必备，勿删。
+- **Next 16 动态路由 `params` 是 Promise**：`[id]/page.tsx` 须 `await params`（约定服务端壳 await 后把 id 传客户端组件）。
 - **不做超范围**：费用、报关、拼箱、权限一律不碰；子页签只留位不实现。
 - **代码整洁优雅**：命名达意、单一职责、不留死代码与无用注释；能复用就抽小函数/小组件，但不过早抽象。每个 Phase 结束前删一遍冗余（重复逻辑、临时调试、未用 import）。宁可少写，不要堆砌。
 
