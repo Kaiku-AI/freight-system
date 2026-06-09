@@ -8,6 +8,7 @@ import { deleteJob, getJob } from "@/lib/api";
 import type { Job, JobBase } from "@/types/job";
 
 import JobForm from "./JobForm";
+import JobTabs, { DEFAULT_TAB, TabPlaceholder } from "./JobTabs";
 import {
   BASIC_FIELDS,
   CONSIGNMENT_FIELDS,
@@ -15,6 +16,7 @@ import {
   SERVICE_FLAGS,
   fmtDate,
   fmtDateTime,
+  statusBadgeClass,
   statusLabel,
   type FieldDef,
 } from "./fields";
@@ -35,6 +37,7 @@ export default function JobDetailClient({ id }: { id: number }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [editing, setEditing] = useState(false);
+  const [tab, setTab] = useState(DEFAULT_TAB);
 
   useEffect(() => {
     let alive = true;
@@ -59,12 +62,12 @@ export default function JobDetailClient({ id }: { id: number }) {
     }
   }
 
-  if (loading) return <p className="text-sm text-zinc-400">加载中…</p>;
+  if (loading) return <p className="text-sm text-faint">加载中…</p>;
   if (error && !job)
     return (
       <div className="text-sm">
-        <p className="mb-3 text-red-600">{error}</p>
-        <Link href="/jobs" className="text-zinc-500 hover:underline">
+        <p className="mb-3 text-star">{error}</p>
+        <Link href="/jobs" className="text-muted hover:text-brand">
           返回列表
         </Link>
       </div>
@@ -75,10 +78,15 @@ export default function JobDetailClient({ id }: { id: number }) {
     <div className="mx-auto max-w-7xl">
       <div className="mb-5 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-zinc-900">{job.job_no}</h1>
-          <p className="mt-1 text-sm text-zinc-500">
-            {job.consignor} · {statusLabel(job.status)}
-          </p>
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl font-semibold text-ink">{job.job_no}</h1>
+            <span
+              className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${statusBadgeClass(job.status)}`}
+            >
+              {statusLabel(job.status)}
+            </span>
+          </div>
+          <p className="mt-1 text-sm text-muted">{job.consignor}</p>
         </div>
         <div className="flex gap-2">
           {!editing && (
@@ -86,26 +94,26 @@ export default function JobDetailClient({ id }: { id: number }) {
               <button
                 type="button"
                 onClick={() => setEditing(true)}
-                className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-700"
+                className="rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-brand-dark"
               >
                 编辑
               </button>
               <button
                 type="button"
                 onClick={onDelete}
-                className="rounded-md border border-zinc-300 px-4 py-2 text-sm text-red-600 transition-colors hover:bg-red-50"
+                className="rounded-lg border border-line-strong px-4 py-2 text-sm text-star transition-colors hover:bg-[#fef2f4]"
               >
                 删除
               </button>
             </>
           )}
-          <Link href="/jobs" className="self-center text-sm text-zinc-500 hover:underline">
+          <Link href="/jobs" className="self-center text-sm text-muted hover:text-brand">
             返回列表
           </Link>
         </div>
       </div>
 
-      {error && <p className="mb-4 text-sm text-red-600">{error}</p>}
+      {error && <p className="mb-4 text-sm text-star">{error}</p>}
 
       {editing ? (
         <JobForm
@@ -122,28 +130,61 @@ export default function JobDetailClient({ id }: { id: number }) {
           <NodeProgress job={job} />
           <ReadSection title="基本信息" fields={BASIC_FIELDS} job={job} />
           <ReadFlags job={job} />
-          <ReadSection title="托单信息" fields={CONSIGNMENT_FIELDS} job={job} />
+          {/* 托单信息及其余子页签（仅托单信息有内容，其余本区域内显示「暂未开放」）*/}
+          <section className="rounded-2xl border border-line bg-white p-5">
+            <JobTabs active={tab} onSelect={setTab} />
+            {tab === DEFAULT_TAB ? (
+              <FieldGrid fields={CONSIGNMENT_FIELDS} job={job} />
+            ) : (
+              <TabPlaceholder name={tab} />
+            )}
+          </section>
         </div>
       )}
     </div>
   );
 }
 
+function SectionShell({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <section className="rounded-2xl border border-line bg-white p-5">
+      <h2 className="mb-5 flex items-center gap-2 text-sm font-semibold text-ink">
+        <span className="h-3.5 w-1 rounded-full bg-brand" />
+        {title}
+      </h2>
+      {children}
+    </section>
+  );
+}
+
+// 只读字段网格（基本信息/托单信息共用）。
+function FieldGrid({ fields, job }: { fields: FieldDef[]; job: Job }) {
+  return (
+    <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      {fields.map((f) => (
+        <div key={f.name} className={f.full ? "col-span-full" : ""}>
+          <dt className="text-xs text-muted">{f.label}</dt>
+          <dd className="mt-0.5 text-sm whitespace-pre-wrap text-ink">{displayValue(job, f)}</dd>
+        </div>
+      ))}
+    </dl>
+  );
+}
+
 function NodeProgress({ job }: { job: Job }) {
   return (
-    <section className="rounded-xl border border-zinc-200 bg-white p-5">
-      <h2 className="mb-4 text-sm font-semibold text-zinc-900">节点进度</h2>
+    <SectionShell title="节点进度">
       <ol className="flex flex-wrap gap-x-6 gap-y-3 text-sm">
         {NODE_FIELDS.map((n) => {
           const done = Boolean(job[n.name]);
           return (
             <li key={n.name} className="flex items-center gap-2">
-              <span className={done ? "text-emerald-600" : "text-zinc-300"}>
+              <span className={done ? "text-[#138a5b]" : "text-faint"}>
                 {done ? "✓" : "○"}
               </span>
-              <span className={done ? "text-zinc-900" : "text-zinc-400"}>{n.label}</span>
+              <span className={done ? "text-ink" : "text-faint"}>{n.label}</span>
               {done && (
-                <span className="text-xs text-zinc-400">
+                <span className="text-xs text-faint">
                   {fmtDateTime(String(job[n.name]))}
                 </span>
               )}
@@ -151,55 +192,36 @@ function NodeProgress({ job }: { job: Job }) {
           );
         })}
       </ol>
-    </section>
+    </SectionShell>
   );
 }
 
-function ReadSection({
-  title,
-  fields,
-  job,
-}: {
-  title: string;
-  fields: FieldDef[];
-  job: Job;
-}) {
+function ReadSection({ title, fields, job }: { title: string; fields: FieldDef[]; job: Job }) {
   return (
-    <section className="rounded-xl border border-zinc-200 bg-white p-5">
-      <h2 className="mb-4 text-sm font-semibold text-zinc-900">{title}</h2>
-      <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {fields.map((f) => (
-          <div key={f.name} className={f.full ? "col-span-full" : ""}>
-            <dt className="text-xs text-zinc-500">{f.label}</dt>
-            <dd className="mt-0.5 text-sm whitespace-pre-wrap text-zinc-900">
-              {displayValue(job, f)}
-            </dd>
-          </div>
-        ))}
-      </dl>
-    </section>
+    <SectionShell title={title}>
+      <FieldGrid fields={fields} job={job} />
+    </SectionShell>
   );
 }
 
 function ReadFlags({ job }: { job: Job }) {
   const active = SERVICE_FLAGS.filter((f) => Boolean(job[f.name as keyof JobBase]));
   return (
-    <section className="rounded-xl border border-zinc-200 bg-white p-5">
-      <h2 className="mb-4 text-sm font-semibold text-zinc-900">服务标志</h2>
+    <SectionShell title="服务标志">
       {active.length === 0 ? (
-        <p className="text-sm text-zinc-400">无</p>
+        <p className="text-sm text-faint">无</p>
       ) : (
         <div className="flex flex-wrap gap-2">
           {active.map((f) => (
             <span
               key={f.name}
-              className="rounded-full bg-zinc-100 px-3 py-1 text-xs text-zinc-700"
+              className="rounded-full bg-brand-soft px-3 py-1 text-xs font-medium text-brand"
             >
               {f.label}
             </span>
           ))}
         </div>
       )}
-    </section>
+    </SectionShell>
   );
 }

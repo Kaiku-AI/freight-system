@@ -6,6 +6,8 @@ import { useState } from "react";
 import { createJob, updateJob } from "@/lib/api";
 import type { Job } from "@/types/job";
 
+import JobTabs, { DEFAULT_TAB, TabPlaceholder } from "./JobTabs";
+import { ToolbarDivider, ToolbarGhost } from "./Toolbar";
 import {
   BASIC_FIELDS,
   CONSIGNMENT_FIELDS,
@@ -30,6 +32,7 @@ export default function JobForm({
   const [state, setState] = useState<FormState>(() => initialFormState(job));
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [tab, setTab] = useState(DEFAULT_TAB);
 
   const set = (name: string, value: string | boolean) =>
     setState((s) => ({ ...s, [name]: value }));
@@ -58,8 +61,28 @@ export default function JobForm({
 
   return (
     <form onSubmit={onSubmit} className="space-y-6">
+      {/* 顶部工具栏（还原 Penpot）：保存/放弃可用，其余仅展示 */}
+      <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-line bg-white p-3">
+        <button
+          type="submit"
+          disabled={submitting}
+          className="rounded-lg bg-brand px-4 py-1.5 text-sm font-medium text-white transition-colors hover:bg-brand-dark disabled:opacity-60"
+        >
+          {submitting ? "保存中…" : "保存"}
+        </button>
+        <button
+          type="button"
+          onClick={() => (onCancel ? onCancel() : router.back())}
+          className="rounded-lg border border-line-strong px-4 py-1.5 text-sm text-body transition-colors hover:bg-canvas"
+        >
+          放弃
+        </button>
+        <ToolbarDivider />
+        <ToolbarGhost items={["订舱模板 ▾", "相关操作 ▾", "动作 ▾", "数据交换 ▾", "通知 ▾", "系统功能 ▾"]} />
+      </div>
+
       {error && (
-        <p className="rounded-md border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-600">
+        <p className="rounded-lg border border-[#f7c9d4] bg-[#fef2f4] px-4 py-2 text-sm text-star">
           {error}
         </p>
       )}
@@ -71,14 +94,14 @@ export default function JobForm({
       </Section>
 
       <Section title="服务标志">
-        <div className="col-span-full grid grid-cols-2 gap-x-4 gap-y-2 sm:grid-cols-3 lg:grid-cols-6">
+        <div className="col-span-full grid grid-cols-2 gap-x-4 gap-y-2.5 sm:grid-cols-3 lg:grid-cols-6">
           {SERVICE_FLAGS.map((f) => (
-            <label key={f.name} className="flex items-center gap-2 text-sm text-zinc-700">
+            <label key={f.name} className="flex items-center gap-2 text-sm text-body">
               <input
                 type="checkbox"
                 checked={Boolean(state[f.name])}
                 onChange={(e) => set(f.name, e.target.checked)}
-                className="h-4 w-4 rounded border-zinc-300"
+                className="h-4 w-4 rounded border-line-strong accent-brand"
               />
               {f.label}
             </label>
@@ -86,38 +109,32 @@ export default function JobForm({
         </div>
       </Section>
 
-      <Section title="托单信息">
-        {CONSIGNMENT_FIELDS.map((f) => (
-          <FieldInput key={f.name} def={f} value={state[f.name] as string} onChange={set} />
-        ))}
-      </Section>
-
-      <div className="flex gap-2">
-        <button
-          type="submit"
-          disabled={submitting}
-          className="rounded-md bg-zinc-900 px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-700 disabled:opacity-60"
-        >
-          {submitting ? "保存中…" : "保存"}
-        </button>
-        <button
-          type="button"
-          onClick={() => (onCancel ? onCancel() : router.back())}
-          className="rounded-md border border-zinc-300 px-5 py-2 text-sm text-zinc-700 transition-colors hover:bg-zinc-100"
-        >
-          取消
-        </button>
-      </div>
+      {/* 托单信息及其余子页签（仅托单信息可填，其余本区域内显示「暂未开放」）*/}
+      <section className="rounded-2xl border border-line bg-white p-5">
+        <JobTabs active={tab} onSelect={setTab} />
+        {tab === DEFAULT_TAB ? (
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {CONSIGNMENT_FIELDS.map((f) => (
+              <FieldInput key={f.name} def={f} value={state[f.name] as string} onChange={set} />
+            ))}
+          </div>
+        ) : (
+          <TabPlaceholder name={tab} />
+        )}
+      </section>
     </form>
   );
 }
 
-// 分块容器：标题 + 字段网格。
+// 分块容器：标题（主色竖条）+ 字段网格。
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="rounded-xl border border-zinc-200 bg-white p-5">
-      <h2 className="mb-4 text-sm font-semibold text-zinc-900">{title}</h2>
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">{children}</div>
+    <section className="rounded-2xl border border-line bg-white p-5">
+      <h2 className="mb-5 flex items-center gap-2 text-sm font-semibold text-ink">
+        <span className="h-3.5 w-1 rounded-full bg-brand" />
+        {title}
+      </h2>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">{children}</div>
     </section>
   );
 }
@@ -133,14 +150,14 @@ function FieldInput({
   onChange: (name: string, value: string) => void;
 }) {
   const inputBase =
-    "rounded-md border px-3 py-1.5 text-sm text-zinc-900 outline-none focus:border-zinc-900 " +
-    (def.required ? "border-amber-300 bg-amber-50" : "border-zinc-300");
+    "rounded-lg border px-3 py-1.5 text-sm text-ink outline-none transition-colors focus:border-brand " +
+    (def.required ? "border-required-line bg-required" : "border-line bg-white");
 
   return (
-    <label className={`flex flex-col gap-1 text-xs text-zinc-500 ${def.full ? "col-span-full" : ""}`}>
+    <label className={`flex flex-col gap-1 text-xs text-muted ${def.full ? "col-span-full" : ""}`}>
       <span>
         {def.label}
-        {def.required && <span className="ml-0.5 text-red-500">*</span>}
+        {def.required && <span className="ml-0.5 text-star">*</span>}
       </span>
       {def.type === "textarea" ? (
         <textarea

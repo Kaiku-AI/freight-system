@@ -7,8 +7,8 @@ export default function NewJobPage() {
   return (
     <div className="mx-auto max-w-7xl">
       <div className="mb-5 flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-zinc-900">新建整箱</h1>
-        <Link href="/jobs" className="text-sm text-zinc-500 hover:text-zinc-900 hover:underline">
+        <h1 className="text-2xl font-semibold text-ink">新建整箱</h1>
+        <Link href="/jobs" className="text-sm text-muted hover:text-brand">
           返回列表
         </Link>
       </div>

@@ -16,12 +16,14 @@ describe("modules", () => {
     expect(new Set(flat.map((m) => m.key)).size).toBe(MODULES.length);
   });
 
-  it("groupedModules 保持分组首次出现的顺序", () => {
+  it("groupedModules 保持分组首次出现的顺序（对齐 Penpot 主页 6 组）", () => {
     expect(groupedModules().map((g) => g.group)).toEqual([
       "委托单",
       "操作",
       "本地业务",
       "费用",
+      "文档",
+      "统计分析",
     ]);
   });
 });

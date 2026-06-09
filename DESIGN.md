@@ -267,35 +267,26 @@ freight-system/
 
 ### 7.1 模块清单：单一数据源（驱动主页 + 导航 + 暂未开放）
 
-一份静态模块清单 `lib/modules.ts` 是导航的**唯一数据源**：主页卡片、侧边导航、「暂未开放」状态全部由它派生，避免多处维护不一致。
+`lib/modules.ts` 是导航的**唯一数据源**，对齐 Penpot 主页结构派生三处，避免多处维护不一致：
+
+1. **侧边栏顶层导航 `SIDEBAR_GROUPS`**（Penpot 左栏「业务中心 / 系统」）：工作台 / 海运出口 / 海运进口 / 本地业务 / 财务管理 + 基础数据 / 系统设置。仅「海运出口」指向真实主页 `/`（模块导航），其余 → `/unavailable`。海运出口在 `/` 与 `/jobs*` 下高亮——故任意模块页都能由侧栏回到模块导航（解决「进了模块回不去」）。
+2. **主页「海运出口」功能网格 `MODULES`**（Penpot 主页 56 项，6 组 委托单/操作/本地业务/费用/文档/统计分析）：仅 `新建整箱→/jobs/new`、`作业列表→/jobs` 已实现（主色），其余 `enabled:false`（弱化显示、点击 → `/unavailable`）。分组色点由 `GROUP_COLOR` 派生，`groupedModules()` 返回 `{group,color,items}`。
+3. **整箱作业页签 `JOB_TABS`**（Penpot 表单 tab）：托单信息 / 其它信息 / 船东舱单 / 货物 / PO Item / 集装箱 / 额外费用 / MB/L / HB/L / 利润减少。仅「托单信息」已实现；其余页签为受控切换，在**本卡片区域内**显示「暂未开放」占位（不跳走、不丢表单），对应 §1「子页签只留位不实现」。新建/明细页共用 `JobTabs`。
 
 ```ts
-// lib/modules.ts
-export type ModuleItem = {
-  key: string;        // 唯一标识
-  name: string;       // 中文名，如「作业列表」
-  href: string;       // 路由，如 /jobs；未开放项点击统一跳 /unavailable
-  group: string;      // 分组，如「委托单」「操作」「本地业务」「费用」
-  enabled: boolean;   // false → 主页显示「暂未开放」、导航不列
-};
-
-export const MODULES: ModuleItem[] = [
-  { key: 'job-new',  name: '新建整箱', href: '/jobs/new', group: '委托单', enabled: true },
-  { key: 'job-list', name: '作业列表', href: '/jobs',     group: '操作',   enabled: true },
-  // 以下为规划中（Penpot 中标紫），enabled:false → 点击跳统一占位页 /unavailable
-  { key: 'mbl',     name: 'MB/L列表', href: '#', group: '操作',     enabled: false },
-  { key: 'hbl',     name: 'HB/L列表', href: '#', group: '操作',     enabled: false },
-  { key: 'customs', name: '报关信息',  href: '#', group: '本地业务', enabled: false },
-  { key: 'fee',     name: '费用列表',  href: '#', group: '费用',     enabled: false },
-  // ...
-];
+// lib/modules.ts（要点）
+export type ModuleItem = { key; name; href; group; enabled };  // 网格项
+export type NavItem = { key; name; icon; href };               // 侧栏项
+export const SIDEBAR_GROUPS = [{ label:'业务中心', items:[...] }, { label:'系统', items:[...] }];
+export const GROUP_COLOR = { 委托单:'#5b5bd6', 操作:'#e8833a', 本地业务:'#2bb6a3', 费用:'#e85d8c', 文档:'#8a6ad6', 统计分析:'#3a8ee8' };
+export const MODULES: ModuleItem[] = /* 由分组名单 GRID 派生，已实现项映射真实路由 */;
+export const JOB_TABS = [{ name:'托单信息', enabled:true }, /* …其余 enabled:false */];
 ```
 
-- **主页（`/`）**：按 `group` 分组渲染卡片，**所有卡片都可点**；`enabled:true` 进入真实页面，`enabled:false` 跳统一「暂未开放」占位页（不置灰、不禁用，点进去只显示一句「暂未开放」，没有列表数据）。
-- **导航栏**：`MODULES.filter(m => m.enabled)` 后渲染，没做的不列。
-- **新增模块**：建好页面后把对应项 `enabled` 改 `true`（或新增一项）即可，主页与导航自动出现。
+- **新增模块**：把对应网格项映射到真实路由（或页签 `enabled` 改 `true`）即可，主页/侧栏/页签自动反映。
+- **未开放统一占位**：网格项、页签、侧栏未实现项点击都到 `/unavailable`（只显示「暂未开放」，无列表数据）。
 
-> Penpot 的 56 项功能不必全部录入：本期只录「已做 + 计划要做（标紫）」即可，纯不做的可不列。**字段/路由以本文档为准，Penpot 仅供样式参考。**
+> 清单**列全** Penpot 的 56 项功能 + 7 项顶层导航 + 10 个表单页签（让界面铺满、贴合真实系统骨架），但**只有「新建整箱 / 作业列表 / 托单信息」是真实页面**，其余全部占位。**字段/路由以本文档为准，Penpot 仅供样式与信息架构参考。**
 
 ### 7.2 文件组织（按模块分目录，shell 与模块分离）
 

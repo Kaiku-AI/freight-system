@@ -1,34 +1,58 @@
 import Link from "next/link";
 
-import { groupedModules } from "@/lib/modules";
+import { MODULES, groupedModules } from "@/lib/modules";
 
-// 主页 / 模块导航（DESIGN §6/§7.1）：按 group 渲染卡片，全部可点。
-// enabled 进真实页面；未开放统一跳 /unavailable。
+// 主页 / 模块导航（DESIGN §6/§7.1）：白卡内按 group 渲染模块链接，全部可点。
+// enabled 进真实页面（主色）；未开放统一跳 /unavailable（弱化文本）。
 export default function Home() {
   return (
-    <div className="mx-auto max-w-5xl">
-      <h1 className="mb-6 text-2xl font-semibold text-zinc-900">模块导航</h1>
-
-      <div className="flex flex-col gap-8">
-        {groupedModules().map(({ group, items }) => (
-          <section key={group}>
-            <h2 className="mb-3 text-sm font-medium text-zinc-500">{group}</h2>
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-              {items.map((m) => (
-                <Link
-                  key={m.key}
-                  href={m.enabled ? m.href : "/unavailable"}
-                  className="group rounded-xl border border-zinc-200 bg-white p-5 transition-colors hover:border-zinc-400"
-                >
-                  <span className="text-base font-medium text-zinc-900">{m.name}</span>
-                  {!m.enabled && (
-                    <span className="mt-1 block text-xs text-zinc-400">暂未开放</span>
-                  )}
-                </Link>
-              ))}
+    <div className="mx-auto max-w-6xl">
+      <div className="rounded-2xl border border-line bg-white p-7 shadow-[0_1px_2px_rgba(22,24,35,0.04)]">
+        {/* 卡片头 */}
+        <div className="flex items-start justify-between border-b border-line pb-5">
+          <div className="flex items-center gap-3.5">
+            <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-soft text-lg font-bold text-brand">
+              海
+            </span>
+            <div>
+              <h1 className="text-lg font-semibold text-ink">海运出口</h1>
+              <p className="mt-0.5 text-sm text-muted">
+                Sea Freight Export · 选择要进入的功能模块
+              </p>
             </div>
-          </section>
-        ))}
+          </div>
+          <span className="rounded-full bg-canvas px-3 py-1 text-xs text-muted">
+            共 {MODULES.length} 项功能
+          </span>
+        </div>
+
+        {/* 分组 */}
+        <div className="flex flex-col gap-8 pt-6">
+          {groupedModules().map(({ group, color, items }) => (
+            <section key={group}>
+              <h2 className="mb-3.5 flex items-center gap-2 text-sm font-semibold text-ink">
+                <span className="h-2 w-2 rounded-full" style={{ backgroundColor: color }} />
+                {group}
+                <span className="text-xs font-normal text-faint">{items.length}</span>
+              </h2>
+              <div className="grid grid-cols-2 gap-x-6 gap-y-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+                {items.map((m) => (
+                  <Link
+                    key={m.key}
+                    href={m.enabled ? m.href : "/unavailable"}
+                    className={`text-sm transition-colors ${
+                      m.enabled
+                        ? "font-medium text-brand hover:text-brand-dark"
+                        : "text-body hover:text-brand"
+                    }`}
+                  >
+                    {m.name}
+                  </Link>
+                ))}
+              </div>
+            </section>
+          ))}
+        </div>
       </div>
     </div>
   );

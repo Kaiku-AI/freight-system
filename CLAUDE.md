@@ -35,7 +35,9 @@ PROGRESS.md 进度与分步计划
 ## 4. 必须守住的约定（最容易写歪的地方）
 
 - **状态边界不混用**：服务端数据走 `lib/api.ts` 的 fetch；客户端 UI 状态（登录标记）走 Zustand；列表筛选放 URL query。
-- **模块清单单一数据源**：主页卡片、导航、「暂未开放」全部由 `lib/modules.ts` 派生，不在别处硬编码。
+- **模块清单单一数据源**：`lib/modules.ts` 派生三处，不在别处硬编码——① 侧栏顶层导航 `SIDEBAR_GROUPS`（业务中心/系统，仅「海运出口」→`/`，其余→`/unavailable`；海运出口在 `/` 与 `/jobs*` 高亮；图标按 `item.key` 由 `components/NavIcons.tsx` 渲染线性 SVG，勿用 emoji）；② 主页功能网格 `MODULES`（Penpot 56 项 6 组，仅 job-new/job-list 真实，分组色点 `GROUP_COLOR`，`groupedModules()` 返回 `{group,color,items}`，未开放跳 `/unavailable`）；③ 整箱页签 `JOB_TABS`（10 个，仅 托单信息 真实）——页签是**受控组件**（`JobTabs` + `TabPlaceholder`），未实现页签在**本卡片内**显示「暂未开放」占位、不跳走不丢表单（区别于 ①②的跳 `/unavailable`）。清单列全但只有「新建整箱/作业列表/托单信息」是真实页面。
+- **顶栏面包屑 + 装饰工具栏（还原 Penpot，不可点）**：`AppShell` 顶栏左侧面包屑「海运出口 / <当前模块>」，首段恒链到 `/`，是任意模块页回模块导航的入口（侧栏「海运出口」亦可）；模块页顶部工具栏里真实可用的按钮（保存/放弃/新建/删除）各页自渲染，其余 Penpot 工具按钮用 `_components/Toolbar.tsx` 的 `ToolbarGhost`（`disabled`、灰显、本期不可点）并排展示。
+- **视觉令牌单一数据源**：配色取自 Penpot 视觉稿，统一定义在 `app/globals.css` 的 `@theme`（Tailwind v4 命名色 → 自动生成 `bg-/text-/border-` 等工具类，语义名 `brand`/`brand-dark`/`brand-soft`/`ink`/`body`/`muted`/`faint`/`line`/`line-strong`/`canvas`/`field`/`required`/`star`）。全站只用这套语义色，不再裸用 `zinc-/amber-/emerald-` 等默认色阶；出运状态胶囊配色集中在 `fields.ts` 的 `statusBadgeClass`。改配色只动 `@theme`。
 - **类型对齐**：`types/job.ts` 字段与后端 SQLModel / DESIGN.md §4 一一对应，改字段一处改。
 - **job_no 规则**：`EXP+日期+流水`，如 `EXP20260608-001`，后端生成。
 - **登录无鉴权**：固定账号 `test / test123`（环境变量），不发 token。退出登录纯前端清标记。

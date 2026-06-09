@@ -33,6 +33,16 @@ export const STATUS_OPTIONS = [
 export const statusLabel = (s?: string | null) =>
   STATUS_OPTIONS.find((o) => o.value === s)?.label ?? s ?? "-";
 
+// 出运状态胶囊配色（取自 Penpot 列表状态色）：底色/文字静态类，供列表与明细共用。
+const STATUS_STYLE: Record<string, string> = {
+  draft: "bg-[#e9f2ff] text-[#2c6fd6]",
+  active: "bg-[#e6f7f0] text-[#138a5b]",
+  closed: "bg-[#f1ecfe] text-[#7a47d8]",
+};
+
+export const statusBadgeClass = (s?: string | null) =>
+  STATUS_STYLE[s ?? ""] ?? "bg-field text-muted";
+
 // 日期/时间在 JSON 里是 ISO 字符串，展示/表单里只取需要的前缀。
 export const fmtDate = (s?: string | null) => (s ? s.slice(0, 10) : "-");
 export const fmtDateTime = (s?: string | null) => (s ? s.slice(0, 16).replace("T", " ") : "-");
