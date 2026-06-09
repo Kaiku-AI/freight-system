@@ -1,0 +1,31 @@
+# ---- Python / FastAPI ----
+backend/.venv/
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+*.db
+*.sqlite3
+
+# ---- Node / Next.js ----
+node_modules/
+frontend/.next/
+frontend/out/
+frontend/build/
+.next/
+
+# ---- Env & secrets (绝不提交) ----
+.env
+.env.*
+!.env.example
+
+# ---- Editor / OS ----
+.DS_Store
+.vscode/
+.idea/
+*.log
+
+# ---- Vercel ----
+.vercel
