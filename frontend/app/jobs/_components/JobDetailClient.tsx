@@ -11,8 +11,8 @@ import JobForm from "./JobForm";
 import JobTabs, { DEFAULT_TAB, TabPlaceholder } from "./JobTabs";
 import {
   BASIC_FIELDS,
+  CONFIRMATION_FLAGS,
   CONSIGNMENT_FIELDS,
-  NODE_FIELDS,
   SERVICE_FLAGS,
   fmtDate,
   fmtDateTime,
@@ -41,13 +41,16 @@ export default function JobDetailClient({ id }: { id: number }) {
 
   useEffect(() => {
     let alive = true;
-    setLoading(true);
-    getJob(id)
-      .then((data) => alive && setJob(data))
-      .catch((e) => alive && setError(e instanceof Error ? e.message : "加载失败"))
-      .finally(() => alive && setLoading(false));
+    const timer = window.setTimeout(() => {
+      setLoading(true);
+      getJob(id)
+        .then((data) => alive && setJob(data))
+        .catch((e) => alive && setError(e instanceof Error ? e.message : "加载失败"))
+        .finally(() => alive && setLoading(false));
+    }, 0);
     return () => {
       alive = false;
+      window.clearTimeout(timer);
     };
   }, [id]);
 
@@ -126,9 +129,10 @@ export default function JobDetailClient({ id }: { id: number }) {
         />
       ) : (
         <div className="space-y-6">
-          {/* 节点进度（DESIGN §6：订舱→放舱→装箱→舱单→提单→开船）*/}
-          <NodeProgress job={job} />
-          <ReadSection title="基本信息" fields={BASIC_FIELDS} job={job} />
+          <ConfirmationCard job={job} />
+          <SectionShell title="基本信息">
+            <FieldGrid fields={BASIC_FIELDS} job={job} />
+          </SectionShell>
           <ReadFlags job={job} />
           {/* 托单信息及其余子页签（仅托单信息有内容，其余本区域内显示「暂未开放」）*/}
           <section className="rounded-2xl border border-line bg-white p-5">
@@ -171,35 +175,25 @@ function FieldGrid({ fields, job }: { fields: FieldDef[]; job: Job }) {
   );
 }
 
-function NodeProgress({ job }: { job: Job }) {
+function ConfirmationCard({ job }: { job: Job }) {
   return (
-    <SectionShell title="节点进度">
-      <ol className="flex flex-wrap gap-x-6 gap-y-3 text-sm">
-        {NODE_FIELDS.map((n) => {
-          const done = Boolean(job[n.name]);
+    <SectionShell title="作业确认状态">
+      <div className="grid grid-cols-2 gap-x-4 gap-y-2.5 text-sm sm:grid-cols-3 lg:grid-cols-6">
+        {CONFIRMATION_FLAGS.map((n) => {
+          const checked = Boolean(job[n.name]);
           return (
-            <li key={n.name} className="flex items-center gap-2">
-              <span className={done ? "text-[#138a5b]" : "text-faint"}>
-                {done ? "✓" : "○"}
-              </span>
-              <span className={done ? "text-ink" : "text-faint"}>{n.label}</span>
-              {done && (
-                <span className="text-xs text-faint">
-                  {fmtDateTime(String(job[n.name]))}
-                </span>
-              )}
-            </li>
+            <span key={n.name} className="flex items-center gap-2 text-body">
+              <input
+                type="checkbox"
+                checked={checked}
+                readOnly
+                className="h-4 w-4 rounded border-line-strong accent-brand"
+              />
+              {n.label}
+            </span>
           );
         })}
-      </ol>
-    </SectionShell>
-  );
-}
-
-function ReadSection({ title, fields, job }: { title: string; fields: FieldDef[]; job: Job }) {
-  return (
-    <SectionShell title={title}>
-      <FieldGrid fields={fields} job={job} />
+      </div>
     </SectionShell>
   );
 }

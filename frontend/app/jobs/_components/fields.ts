@@ -150,14 +150,14 @@ export const SERVICE_FLAGS: { name: keyof JobBase; label: string }[] = [
   { name: "dap", label: "DAP" },
 ];
 
-// 状态节点（DESIGN §4，可空时间戳，明细页展示进度）。
-export const NODE_FIELDS: { name: keyof JobBase; label: string }[] = [
-  { name: "booking_confirmed_at", label: "订舱确认" },
-  { name: "space_released_at", label: "放舱确认" },
-  { name: "loaded_at", label: "装箱确认" },
-  { name: "manifest_confirmed_at", label: "舱单确认" },
-  { name: "bl_confirmed_at", label: "提单确认" },
-  { name: "sailed_at", label: "开船确认" },
+// D. 作业确认状态（DESIGN §4-D，基本信息中的独立 checkbox）。
+export const CONFIRMATION_FLAGS: { name: keyof JobBase; label: string }[] = [
+  { name: "booking_confirmed", label: "订舱确认" },
+  { name: "space_released", label: "放舱确认" },
+  { name: "container_released", label: "放箱确认" },
+  { name: "manifest_confirmed", label: "舱单确认" },
+  { name: "customs_released", label: "海关放行" },
+  { name: "sailing_confirmed", label: "开船确认" },
 ];
 
 // ---- 表单纯函数（与 React 解耦，便于单测）----
@@ -165,7 +165,7 @@ export const NODE_FIELDS: { name: keyof JobBase; label: string }[] = [
 // 所有「值字段」（非服务标志）——表单状态/payload 构建按它遍历。
 export const VALUE_FIELDS: FieldDef[] = [...BASIC_FIELDS, ...CONSIGNMENT_FIELDS];
 
-// 表单状态：值字段存字符串、服务标志存布尔。
+// 表单状态：值字段存字符串，服务/确认状态存布尔。
 export type FormState = Record<string, string | boolean>;
 
 const today = () => new Date().toISOString().slice(0, 10);
@@ -185,7 +185,9 @@ export function initialFormState(job?: Job): FormState {
       state[f.name] = String(v);
     }
   }
-  for (const f of SERVICE_FLAGS) state[f.name] = Boolean(job?.[f.name]);
+  for (const f of [...SERVICE_FLAGS, ...CONFIRMATION_FLAGS]) {
+    state[f.name] = Boolean(job?.[f.name]);
+  }
   // 新建时补后端默认值（DESIGN §4），让用户看到并可改。
   if (!job) {
     state.business_type = "整柜订舱";
@@ -216,6 +218,8 @@ export function buildJobPayload(state: FormState): JobCreate {
       payload[f.name] = raw;
     }
   }
-  for (const f of SERVICE_FLAGS) payload[f.name] = Boolean(state[f.name]);
+  for (const f of [...SERVICE_FLAGS, ...CONFIRMATION_FLAGS]) {
+    payload[f.name] = Boolean(state[f.name]);
+  }
   return payload as JobCreate;
 }

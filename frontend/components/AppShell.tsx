@@ -33,7 +33,10 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const [mounted, setMounted] = useState(false);
 
   // 等 persist 从 localStorage 水合后再判断，避免 SSR/首帧闪烁与误跳转。
-  useEffect(() => setMounted(true), []);
+  useEffect(() => {
+    const timer = window.setTimeout(() => setMounted(true), 0);
+    return () => window.clearTimeout(timer);
+  }, []);
 
   const isPublic = PUBLIC_PATHS.includes(pathname);
 

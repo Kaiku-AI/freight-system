@@ -101,13 +101,13 @@ export type JobBase = {
   container_summary?: string | null; // 箱型箱量，如 1x40HQ
   remarks?: string | null; // 备注
 
-  // ---- 状态节点（可空时间戳，记录节点完成）----
-  booking_confirmed_at?: string | null; // 订舱确认
-  space_released_at?: string | null; // 放舱确认
-  loaded_at?: string | null; // 装箱确认
-  manifest_confirmed_at?: string | null; // 舱单确认
-  bl_confirmed_at?: string | null; // 提单确认
-  sailed_at?: string | null; // 开船确认
+  // ---- D. 作业确认状态（基本信息勾选项，互相无顺序依赖）----
+  booking_confirmed: boolean; // 订舱确认
+  space_released: boolean; // 放舱确认
+  container_released: boolean; // 放箱确认
+  manifest_confirmed: boolean; // 舱单确认
+  customs_released: boolean; // 海关放行
+  sailing_confirmed: boolean; // 开船确认
 };
 
 // 建单/编辑入参（job_no 由后端生成，不在入参）——对应后端 JobCreate。

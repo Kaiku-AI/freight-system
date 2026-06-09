@@ -10,6 +10,7 @@ import JobTabs, { DEFAULT_TAB, TabPlaceholder } from "./JobTabs";
 import { ToolbarDivider, ToolbarGhost } from "./Toolbar";
 import {
   BASIC_FIELDS,
+  CONFIRMATION_FLAGS,
   CONSIGNMENT_FIELDS,
   SERVICE_FLAGS,
   buildJobPayload,
@@ -87,6 +88,8 @@ export default function JobForm({
         </p>
       )}
 
+      <ConfirmationCard state={state} onChange={set} />
+
       <Section title="基本信息">
         {BASIC_FIELDS.map((f) => (
           <FieldInput key={f.name} def={f} value={state[f.name] as string} onChange={set} />
@@ -123,6 +126,36 @@ export default function JobForm({
         )}
       </section>
     </form>
+  );
+}
+
+function ConfirmationCard({
+  state,
+  onChange,
+}: {
+  state: FormState;
+  onChange: (name: string, value: boolean) => void;
+}) {
+  return (
+    <section className="rounded-2xl border border-line bg-white p-5">
+      <h2 className="mb-5 flex items-center gap-2 text-sm font-semibold text-ink">
+        <span className="h-3.5 w-1 rounded-full bg-brand" />
+        作业确认状态
+      </h2>
+      <div className="grid grid-cols-2 gap-x-4 gap-y-2.5 sm:grid-cols-3 lg:grid-cols-6">
+        {CONFIRMATION_FLAGS.map((f) => (
+          <label key={f.name} className="flex items-center gap-2 text-sm text-body">
+            <input
+              type="checkbox"
+              checked={Boolean(state[f.name])}
+              onChange={(e) => onChange(f.name, e.target.checked)}
+              className="h-4 w-4 rounded border-line-strong accent-brand"
+            />
+            {f.label}
+          </label>
+        ))}
+      </div>
+    </section>
   );
 }
 
@@ -164,6 +197,7 @@ function FieldInput({
           name={def.name}
           value={value}
           onChange={(e) => onChange(def.name, e.target.value)}
+          onInput={(e) => onChange(def.name, e.currentTarget.value)}
           rows={2}
           className={inputBase}
         />
@@ -172,6 +206,7 @@ function FieldInput({
           name={def.name}
           value={value}
           onChange={(e) => onChange(def.name, e.target.value)}
+          onInput={(e) => onChange(def.name, e.currentTarget.value)}
           className={inputBase}
         >
           <option value="">请选择</option>
@@ -196,6 +231,7 @@ function FieldInput({
           step={def.type === "number" ? "any" : undefined}
           value={value}
           onChange={(e) => onChange(def.name, e.target.value)}
+          onInput={(e) => onChange(def.name, e.currentTarget.value)}
           className={inputBase}
         />
       )}

@@ -57,7 +57,10 @@ def test_login_wrong_password(client):
 
 # ---- 新建 ----
 def test_create_job_ok(client):
-    resp = client.post("/api/jobs", json=make_payload())
+    resp = client.post(
+        "/api/jobs",
+        json=make_payload(booking_confirmed=True, customs_released=True),
+    )
     assert resp.status_code == 201
     body = resp.json()
     assert body["id"] is not None
@@ -65,6 +68,9 @@ def test_create_job_ok(client):
     assert body["job_no"].endswith("-001")
     assert body["operator"] == "张三"
     assert body["business_type"] == "整柜订舱"  # 默认值落库
+    assert body["booking_confirmed"] is True
+    assert body["space_released"] is False
+    assert body["customs_released"] is True
 
 
 def test_create_job_missing_required_422(client):
@@ -116,12 +122,19 @@ def test_update_job_ok(client):
     created = client.post("/api/jobs", json=make_payload()).json()
     resp = client.put(
         f"/api/jobs/{created['id']}",
-        json=make_payload(vessel="新船名", consignor="改后客户"),
+        json=make_payload(
+            vessel="新船名",
+            consignor="改后客户",
+            booking_confirmed=True,
+            container_released=True,
+        ),
     )
     assert resp.status_code == 200
     body = resp.json()
     assert body["vessel"] == "新船名"
     assert body["consignor"] == "改后客户"
+    assert body["booking_confirmed"] is True
+    assert body["container_released"] is True
     assert body["job_no"] == created["job_no"]  # 编辑不改作业号
 
 

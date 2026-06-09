@@ -16,9 +16,12 @@ describe("initialFormState", () => {
     expect(s.booking_date).toMatch(/^\d{4}-\d{2}-\d{2}$/);
     expect(s.operator).toBe(""); // 必填但新建为空
     expect(s.trucking).toBe(false);
+    expect(s.booking_confirmed).toBe(false);
+    expect(s.container_released).toBe(false);
+    expect(s.customs_released).toBe(false);
   });
 
-  it("编辑：date/datetime 截断到输入控件所需格式、标志位转布尔", () => {
+  it("编辑：date/datetime 截断到输入控件所需格式、标志位与确认状态转布尔", () => {
     const job = {
       operator: "张三",
       etd: "2026-06-09",
@@ -26,6 +29,9 @@ describe("initialFormState", () => {
       gross_weight: 1200.5,
       trucking: true,
       customs_declare: false,
+      booking_confirmed: true,
+      container_released: false,
+      customs_released: true,
     } as unknown as Job;
     const s = initialFormState(job);
     expect(s.operator).toBe("张三");
@@ -34,6 +40,9 @@ describe("initialFormState", () => {
     expect(s.gross_weight).toBe("1200.5");
     expect(s.trucking).toBe(true);
     expect(s.customs_declare).toBe(false);
+    expect(s.booking_confirmed).toBe(true);
+    expect(s.container_released).toBe(false);
+    expect(s.customs_released).toBe(true);
   });
 });
 
@@ -73,6 +82,8 @@ describe("buildJobPayload", () => {
       gross_weight: "1200.5",
       remarks: "  ", // 仅空白 → null
       trucking: true,
+      booking_confirmed: true,
+      customs_released: true,
     });
     const p = buildJobPayload(s);
     expect(p.operator).toBe("李四");
@@ -82,5 +93,8 @@ describe("buildJobPayload", () => {
     expect(p.remarks).toBeNull(); // 空白被 trim 后视为空
     expect(p.trucking).toBe(true);
     expect(p.warehousing).toBe(false);
+    expect(p.booking_confirmed).toBe(true);
+    expect(p.space_released).toBe(false);
+    expect(p.customs_released).toBe(true);
   });
 });

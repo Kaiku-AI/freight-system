@@ -7,7 +7,13 @@ import { useCallback, useEffect, useState } from "react";
 import { deleteJob, getJobs, type JobFilters } from "@/lib/api";
 import type { Job } from "@/types/job";
 
-import { STATUS_OPTIONS, fmtDate, statusBadgeClass, statusLabel } from "./fields";
+import {
+  CONFIRMATION_FLAGS,
+  STATUS_OPTIONS,
+  fmtDate,
+  statusBadgeClass,
+  statusLabel,
+} from "./fields";
 import { ToolbarDivider, ToolbarGhost } from "./Toolbar";
 
 const PAGE_SIZE = 20;
@@ -22,12 +28,16 @@ const TEXT_FILTERS = [
   { key: "final_destination", label: "目的地" },
 ] as const;
 
-// 布尔列：勾选标记（拖车/报关/提单）。
-function Flag({ on }: { on: boolean }) {
-  return on ? (
-    <span className="text-brand">✓</span>
-  ) : (
-    <span className="text-faint">—</span>
+// 布尔列：与基本信息 checkbox 保持同一视觉语言。
+function Flag({ on, label }: { on: boolean; label: string }) {
+  return (
+    <input
+      type="checkbox"
+      aria-label={label}
+      checked={on}
+      readOnly
+      className="h-4 w-4 rounded border-line-strong accent-brand"
+    />
   );
 }
 
@@ -75,7 +85,8 @@ export default function JobListClient() {
 
   // 筛选/分页变化（URL query 变化）即重拉。
   useEffect(() => {
-    load();
+    const timer = window.setTimeout(() => void load(), 0);
+    return () => window.clearTimeout(timer);
   }, [load]);
 
   // 提交筛选：把表单值写进 URL query（offset 归零），交由上面 effect 重拉。
@@ -218,7 +229,7 @@ export default function JobListClient() {
           <span className="text-xs text-muted">{`共 ${total} 票`}</span>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
+          <table className="min-w-[1500px] w-full text-left text-sm">
             <thead className="border-y border-line bg-canvas text-xs text-muted">
               <tr>
                 <th className="px-4 py-3 font-medium">作业号</th>
@@ -229,22 +240,26 @@ export default function JobListClient() {
                 <th className="px-4 py-3 font-medium">目的地</th>
                 <th className="px-4 py-3 font-medium">ETD</th>
                 <th className="px-4 py-3 font-medium">出运状态</th>
+                {CONFIRMATION_FLAGS.map((f) => (
+                  <th key={f.name} className="px-3 py-3 text-center font-medium">
+                    {f.label}
+                  </th>
+                ))}
                 <th className="px-4 py-3 text-center font-medium">拖车</th>
                 <th className="px-4 py-3 text-center font-medium">报关</th>
-                <th className="px-4 py-3 text-center font-medium">提单</th>
                 <th className="px-4 py-3 text-right font-medium">操作</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-line">
               {loading ? (
                 <tr>
-                  <td colSpan={12} className="px-4 py-10 text-center text-faint">
+                  <td colSpan={17} className="px-4 py-10 text-center text-faint">
                     加载中…
                   </td>
                 </tr>
               ) : jobs.length === 0 ? (
                 <tr>
-                  <td colSpan={12} className="px-4 py-10 text-center text-faint">
+                  <td colSpan={17} className="px-4 py-10 text-center text-faint">
                     暂无作业
                   </td>
                 </tr>
@@ -274,15 +289,16 @@ export default function JobListClient() {
                         {statusLabel(job.status)}
                       </span>
                     </td>
+                    {CONFIRMATION_FLAGS.map((f) => (
+                      <td key={f.name} className="px-3 py-3 text-center">
+                        <Flag on={Boolean(job[f.name])} label={f.label} />
+                      </td>
+                    ))}
                     <td className="px-4 py-3 text-center">
-                      <Flag on={job.trucking} />
+                      <Flag on={job.trucking} label="拖车" />
                     </td>
                     <td className="px-4 py-3 text-center">
-                      <Flag on={job.customs_declare} />
-                    </td>
-                    {/* 提单：提单确认节点（bl_confirmed_at）是否完成 */}
-                    <td className="px-4 py-3 text-center">
-                      <Flag on={Boolean(job.bl_confirmed_at)} />
+                      <Flag on={job.customs_declare} label="报关" />
                     </td>
                     <td className="px-4 py-3 text-right">
                       <button

@@ -113,13 +113,13 @@ class JobBase(SQLModel):
     container_summary: str | None = None  # 箱型箱量，如 1x40HQ
     remarks: str | None = None  # 备注
 
-    # ---- 状态节点（可空时间戳，记录节点完成）----
-    booking_confirmed_at: datetime | None = None  # 订舱确认
-    space_released_at: datetime | None = None  # 放舱确认
-    loaded_at: datetime | None = None  # 装箱确认
-    manifest_confirmed_at: datetime | None = None  # 舱单确认
-    bl_confirmed_at: datetime | None = None  # 提单确认
-    sailed_at: datetime | None = None  # 开船确认
+    # ---- D. 作业确认状态（基本信息勾选项，互相无顺序依赖）----
+    booking_confirmed: bool = False  # 订舱确认
+    space_released: bool = False  # 放舱确认
+    container_released: bool = False  # 放箱确认
+    manifest_confirmed: bool = False  # 舱单确认
+    customs_released: bool = False  # 海关放行
+    sailing_confirmed: bool = False  # 开船确认
 
 
 class Job(JobBase, table=True):

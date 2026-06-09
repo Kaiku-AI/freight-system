@@ -34,6 +34,8 @@ def test_insert_and_select_job(session):
         etd=date(2026, 6, 20),
         mbl_payment="预付",
         trucking=True,
+        booking_confirmed=True,
+        customs_released=True,
         gross_weight=12000.5,
     )
     session.add(job)
@@ -45,6 +47,11 @@ def test_insert_and_select_job(session):
     assert got.operator == "张三"
     assert got.etd == date(2026, 6, 20)
     assert got.trucking is True
+    assert got.booking_confirmed is True
+    assert got.space_released is False
+    assert got.container_released is False
+    assert got.customs_released is True
+    assert got.sailing_confirmed is False
     assert got.gross_weight == 12000.5
     # 默认值落库
     assert got.business_type == "整柜订舱"
