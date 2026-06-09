@@ -21,6 +21,9 @@ frontend/build/
 .env.*
 !.env.example
 
+# ---- Claude Code (本地个人配置) ----
+.claude/settings.local.json
+
 # ---- Editor / OS ----
 .DS_Store
 .vscode/

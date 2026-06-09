@@ -39,6 +39,7 @@ PROGRESS.md 进度与分步计划
 - **类型对齐**：`types/job.ts` 字段与后端 SQLModel / DESIGN.md §4 一一对应，改字段一处改。
 - **job_no 规则**：`EXP+日期+流水`，如 `EXP20260608-001`，后端生成。
 - **登录无鉴权**：固定账号 `test / test123`（环境变量），不发 token。退出登录纯前端清标记。
+- **唯一 auth gate 在 `components/AppShell.tsx`**（客户端）：受保护页未登录跳 `/login`，已登录访问 `/login` 跳主页；登录页在 `PUBLIC_PATHS` 裸渲染、不套导航。persist 水合前用 `mounted` 门控（return null）防首帧误跳。新增「shell 外」公开页改 `PUBLIC_PATHS`，别在各页面各自写 gate。
 - **不做超范围**：费用、报关、拼箱、权限一律不碰；子页签只留位不实现。
 - **代码整洁优雅**：命名达意、单一职责、不留死代码与无用注释；能复用就抽小函数/小组件，但不过早抽象。每个 Phase 结束前删一遍冗余（重复逻辑、临时调试、未用 import）。宁可少写，不要堆砌。
 
