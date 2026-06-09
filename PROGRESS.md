@@ -7,8 +7,8 @@
 
 ## 当前状态 / 下一步
 
-**已完成**：脚手架 + Phase 0~2（后端 API：登录 + 作业 CRUD + job_no + 列表过滤/分页，pytest 14 绿）+ Phase 3 接 Supabase（连接池串就绪，CRUD 冒烟全绿）+ Phase 4 前端骨架（shell + 登录 + 导航 + 模块清单 + 占位页，浏览器自测全过、Vitest 3 绿、build 干净）。
-**下一步 → Phase 5：作业列表（筛选条 + 表格 + 新建/删除）。需 `types/job.ts`（对齐后端字段）+ `lib/api.ts`（getJobs/deleteJob）。**
+**已完成**：脚手架 + Phase 0~2（后端 API：登录 + 作业 CRUD + job_no + 列表过滤/分页，pytest 14 绿）+ Phase 3 接 Supabase（连接池串就绪，CRUD 冒烟全绿）+ Phase 4 前端骨架（shell + 登录 + 导航 + 模块清单 + 占位页，浏览器自测全过、Vitest 3 绿、build 干净）+ Phase 5 作业列表（`types/job.ts` + `lib/api.ts` + `/jobs` 筛选/表格/分页/删除，浏览器自测全过、Vitest 7 绿、build 干净）。
+**下一步 → Phase 6：新建 / 明细 / 编辑。`jobs/new`（基本信息+服务标志+托单信息，必填黄底红星）+ `jobs/[id]`（只读+编辑）。复用 `lib/api.ts` 的 `createJob/getJob/updateJob`（Phase 5 已写好）。**
 
 ---
 
@@ -36,9 +36,9 @@
   - 目标：`layout.tsx`(导航+退出登录)、`login`、`store.ts`(Zustand+localStorage)、`modules.ts`、主页卡片、`unavailable` 占位页。
   - 验收：浏览器自测——登录跳主页 ✓、未登录访问受保护页跳回登录 ✓（`/`、`/jobs` 均跳）、退出登录清标记 ✓（localStorage `freight-auth` 回 loggedIn:false）、未开放卡片跳占位页 ✓、错密码红字提示 ✓、console 无报错 ✓；Vitest `__tests__/modules.test.ts` 3 绿（分组/过滤纯函数）；`npm run build` 干净。
 
-- [ ] **Phase 5 — 作业列表（查询 + 删除）**
+- [x] **Phase 5 — 作业列表（查询 + 删除）**
   - 目标：`jobs/page.tsx` 筛选条 + 表格 + 新建/删除按钮（删除二次确认），`lib/api.ts` 取数。
-  - 验收：浏览器自测——列表从后端加载、筛选生效（URL query）、删除带确认并重拉。console 无报错。
+  - 验收：浏览器自测——列表从后端加载 ✓、筛选生效（URL query，`?consignor=上海`→1 条、`?final_destination=汉堡`→1 条）✓、删除带确认（"确认删除作业 EXP…？"）并重拉（共 3→2 条）✓、console 无报错 ✓；Vitest 7 绿（新增 `__tests__/api.test.ts` 4 例：筛选拼装/空值忽略/DELETE 204/错误抛 detail）；`npm run build` 干净（`/jobs` 静态预渲染）。
 
 - [ ] **Phase 6 — 新建 / 明细 / 编辑**
   - 目标：`jobs/new`（基本信息+服务标志+托单信息，必填黄底红星）、`jobs/[id]`（只读+编辑）。
@@ -63,6 +63,7 @@
 
 ## 变更日志（append-only，新的写最上面）
 
+- **2026-06-09** — Phase 5 完成（作业列表）。新增 `types/job.ts`（全量镜像后端 `JobBase`+系统字段，date/datetime 为 ISO 字符串，作字段唯一对齐源，Phase 6 直接复用）、`lib/api.ts`（统一 `request` helper 抛后端 detail、204 返 undefined；`getJobs`[筛选→URLSearchParams 空值忽略]/`getJob`/`createJob`/`updateJob`/`deleteJob`，全程原生 fetch 不用 SWR）、`app/jobs/page.tsx`（Suspense 包 `JobsClient`）+ `app/jobs/_components/JobsClient.tsx`（筛选条+表格+分页+删除）。回归：`__tests__/api.test.ts` 4 例（全套 Vitest 7 绿）。关键决策/踩坑：① **筛选放 URL query**（DESIGN §3.4）：表单 `name` → `onSearch` 收成 URLSearchParams → `router.push`（offset 归零）；`useSearchParams` 变化触发 `load()` 重拉；分页 `offset` 也在 URL。② Next 16 要求用 `useSearchParams` 的客户端组件包 `<Suspense>`，否则 build 报错——故 page.tsx 作服务端壳套 Suspense。③ 列「提单」DESIGN 未明确映射哪个字段（与 拖车=trucking/报关=customs_declare 并列），暂取「提单确认节点」`bl_confirmed_at` 是否完成渲染 ✓/—，Phase 6/视觉阶段可再校。④ 筛选 UI 取列对齐的常用项（作业号/委托人/船名/MBL/起运港/目的地/状态/ETD 区间）；后端另支持 voyage/booking_agent，UI 暂未放（保持筛选条简洁，需要再加）。⑤ **Claude Preview 自测踩坑**：`preview_click` 的合成点击不触发 React 受控 `onSubmit`/`onClick`，改用 `requestSubmit()`/原生 `.click()`（并 stub `window.confirm`）才验到提交与删除——处理器本身无误，纯工具限制。⑥ 浏览器自测在 Supabase 真库建了 3 条中文样例单（删 1 留 2：EXP20260609-001/-002），留给 Phase 6 明细/编辑自测用，非生产数据。下一步 Phase 6（新建/明细/编辑）。
 - **2026-06-09** — 计划调整：新增 **Phase 8「视觉还原（对 Penpot 调样式）」**，原部署上线顺延为 Phase 9。决策背景：Penpot 全程定位为「样式参考」（DESIGN §0/§7.1，冲突以文档为准），原计划无专门视觉还原步骤，前端骨架先用功能型 Tailwind 样式（不刻意还原 Penpot）；与用户确认后定为「功能全做完，最后统一对 Penpot 调样式」——功能与视觉分开，视觉 Phase 只动样式不改字段/路由/交互。
 - **2026-06-09** — Phase 4 完成（前端骨架）。新增 `lib/store.ts`（Zustand+persist 存登录标记，name `freight-auth`）、`lib/modules.ts`（模块清单唯一数据源 + `enabledModules`/`groupedModules` 派生）、`components/AppShell.tsx`（全局 shell：客户端 auth gate + 侧栏导航[只列 enabled] + 顶栏退出登录）、`app/login`、`app/page.tsx`（主页按 group 渲染卡片，未开放跳 `/unavailable`）、`app/unavailable`；改 `app/layout.tsx`（中文 lang/metadata，套 AppShell）、`app/globals.css`（去 dark-mode 媒体查询，统一浅色）。`next.config.ts` 加 dev rewrites：`/api/*` → `BACKEND_ORIGIN`(默认 `http://localhost:8000`)，仅 development 生效（线上走 vercel.json）。回归：Vitest 装好 + `__tests__/modules.test.ts` 3 绿（`vitest.config.ts` 配 `@/` 别名，加 `npm test` 脚本）。关键决策/踩坑：① 登录态纯客户端（Zustand+localStorage，无 token），故 auth gate 也在客户端 AppShell；persist 水合前用 `mounted` 标志门控，`mounted` 前 return null 避免 SSR 首帧闪烁与误跳转。② login 是「shell 外」——AppShell 对 `PUBLIC_PATHS=['/login']` 裸渲染、不套导航；已登录访问 /login 自动跳主页。③ 浏览器自测用 Claude Preview（Chrome 扩展未连），新增 `.claude/launch.json`（preview_start 用，`npm --prefix frontend run dev`）。④ 本机 8000 端口此次空闲，后端正常起在 8000（后端连 Supabase 启动需 ~8s）。下一步 Phase 5（作业列表）。
 - **2026-06-09** — Phase 3 完成。接 Supabase：`backend/.env`（已 gitignore）写入 `DATABASE_URL`=Transaction pooler 连接池串（端口 6543，`postgresql+psycopg2://`）；`requirements.txt` 加 `psycopg2-binary`+`python-dotenv`；`db.py` 顶部 `load_dotenv()` 使本地 uvicorn/脚本能读 `.env`（线上由平台注入，无需 `.env`）。新增 `backend/scripts/smoke_supabase.py` 冒烟脚本（建表+CRUD 全链路+自清理，长期保留）。关键决策/踩坑：① 用 Transaction pooler(6543) 而非 Direct(5432)，psycopg2 同步驱动默认不开服务端 prepared statement，与 pgbouncer 事务模式兼容；② `TestClient(app)` 非 `with` 用法**不触发 lifespan**，故脚本显式调 `create_db_and_tables()` 建表；③ 建单返回 **201**、删除返回 **204**（标准 REST，先前 Phase 2 已如此，勿误期望 200）。回归 pytest 仍 14 绿。下一步 Phase 4（前端，建议开新对话）。
