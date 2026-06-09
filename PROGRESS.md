@@ -1,7 +1,7 @@
 # PROGRESS.md — 进度与分步计划
 
 > 跨会话的「记忆」。开工先读这里找「下一步」，收尾回来勾选 + 记日志。
-> 规则见 `CLAUDE.md`。需求真源是 `DESIGN.md`。
+> 规则见 `AGENTS.md`。需求真源是 `DESIGN.md`。
 
 ---
 
