@@ -1,5 +1,10 @@
 import os
+import sys
 from contextlib import asynccontextmanager
+
+# Vercel 上入口是 backend/index.py，但 Python 搜索根是仓库根，裸导入（from db ...）会失败；
+# 把本文件所在目录（backend/）加进搜索路径，使本地与 serverless 两处导入一致。
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from fastapi import FastAPI, HTTPException
 
