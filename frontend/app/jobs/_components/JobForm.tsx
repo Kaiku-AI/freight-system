@@ -6,9 +6,8 @@ import { useState } from "react";
 import { createJob, updateJob } from "@/lib/api";
 import type { Job } from "@/types/job";
 
-import BookingAction from "./BookingAction";
 import JobTabs, { DEFAULT_TAB, TabPlaceholder } from "./JobTabs";
-import { ToolbarDivider, ToolbarGhost } from "./Toolbar";
+import JobToolbar from "./JobToolbar";
 import {
   BASIC_FIELDS,
   CONFIRMATION_FLAGS,
@@ -63,28 +62,11 @@ export default function JobForm({
 
   return (
     <form onSubmit={onSubmit} className="space-y-6">
-      {/* 顶部工具栏（还原 Penpot）：保存/放弃可用，其余仅展示 */}
-      <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-line bg-white p-3">
-        <button
-          type="submit"
-          disabled={submitting}
-          className="rounded-lg bg-brand px-4 py-1.5 text-sm font-medium text-white transition-colors hover:bg-brand-dark disabled:opacity-60"
-        >
-          {submitting ? "保存中…" : "保存"}
-        </button>
-        <button
-          type="button"
-          onClick={() => (onCancel ? onCancel() : router.back())}
-          className="rounded-lg border border-line-strong px-4 py-1.5 text-sm text-body transition-colors hover:bg-canvas"
-        >
-          放弃
-        </button>
-        <ToolbarDivider />
-        <ToolbarGhost items={["订舱模板 ▾", "相关操作 ▾"]} />
-        {/* 订舱是对「已存在的作业单」发起的动作：新建（未落库、信息未全）时灰显不可点，进入编辑才真实可用。*/}
-        {job ? <BookingAction /> : <ToolbarGhost items={["动作 ▾"]} />}
-        <ToolbarGhost items={["数据交换 ▾", "通知 ▾", "系统功能 ▾"]} />
-      </div>
+      <JobToolbar
+        mode={job ? "edit" : "new"}
+        submitting={submitting}
+        onCancel={() => (onCancel ? onCancel() : router.back())}
+      />
 
       {error && (
         <p className="rounded-lg border border-[#f7c9d4] bg-[#fef2f4] px-4 py-2 text-sm text-star">

@@ -9,6 +9,7 @@ import type { Job, JobBase } from "@/types/job";
 
 import JobForm from "./JobForm";
 import JobTabs, { DEFAULT_TAB, TabPlaceholder } from "./JobTabs";
+import JobToolbar from "./JobToolbar";
 import {
   BASIC_FIELDS,
   CONFIRMATION_FLAGS,
@@ -129,6 +130,8 @@ export default function JobDetailClient({ id }: { id: number }) {
         />
       ) : (
         <div className="space-y-6">
+          {/* 查看态也显示工具栏：保存/放弃灰显，「动作」可点（查看时也能发起订舱）。*/}
+          <JobToolbar mode="view" />
           <ConfirmationCard job={job} />
           <SectionShell title="基本信息">
             <FieldGrid fields={BASIC_FIELDS} job={job} />
