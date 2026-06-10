@@ -6,6 +6,7 @@ import { useState } from "react";
 import { createJob, updateJob } from "@/lib/api";
 import type { Job } from "@/types/job";
 
+import BookingAction from "./BookingAction";
 import JobTabs, { DEFAULT_TAB, TabPlaceholder } from "./JobTabs";
 import { ToolbarDivider, ToolbarGhost } from "./Toolbar";
 import {
@@ -79,7 +80,20 @@ export default function JobForm({
           放弃
         </button>
         <ToolbarDivider />
-        <ToolbarGhost items={["订舱模板 ▾", "相关操作 ▾", "动作 ▾", "数据交换 ▾", "通知 ▾", "系统功能 ▾"]} />
+        <ToolbarGhost items={["订舱模板 ▾", "相关操作 ▾"]} />
+        {/* 订舱是对「已存在的作业单」发起的动作：新建（未落库、信息未全）时灰显不可点，进入编辑才真实可用。*/}
+        {job ? (
+          <BookingAction
+            onApply={(r) => {
+              // 只回填不保存：写入订舱号 + 勾选订舱确认，落库仍由顶部「保存」统一触发。
+              set("so_no", r.so_no);
+              set("booking_confirmed", true);
+            }}
+          />
+        ) : (
+          <ToolbarGhost items={["动作 ▾"]} />
+        )}
+        <ToolbarGhost items={["数据交换 ▾", "通知 ▾", "系统功能 ▾"]} />
       </div>
 
       {error && (
