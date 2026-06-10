@@ -170,15 +170,6 @@ export type FormState = Record<string, string | boolean>;
 
 const today = () => new Date().toISOString().slice(0, 10);
 
-// 模拟向船公司发订舱 EDI 后收到的回执：仅含一个船东订舱号（SO+日期+4位流水）。
-// 纯函数、无副作用，便于单测；落库与否由调用方决定（本期只回填表单、不自动保存）。
-export type BookingReceipt = { so_no: string };
-
-export function makeBookingReceipt(): BookingReceipt {
-  const seq = String(Math.floor(1000 + Math.random() * 9000));
-  return { so_no: `SO${today().replace(/-/g, "")}-${seq}` };
-}
-
 // 把作业（编辑）或默认值（新建）铺成表单初始状态。
 export function initialFormState(job?: Job): FormState {
   const state: FormState = {};

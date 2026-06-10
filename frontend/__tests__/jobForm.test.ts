@@ -3,7 +3,6 @@ import { describe, expect, it } from "vitest";
 import {
   buildJobPayload,
   initialFormState,
-  makeBookingReceipt,
   missingRequired,
 } from "@/app/jobs/_components/fields";
 import type { Job } from "@/types/job";
@@ -97,16 +96,5 @@ describe("buildJobPayload", () => {
     expect(p.booking_confirmed).toBe(true);
     expect(p.space_released).toBe(false);
     expect(p.customs_released).toBe(true);
-  });
-});
-
-describe("makeBookingReceipt", () => {
-  it("回执号为 SO+8位日期+4位流水", () => {
-    expect(makeBookingReceipt().so_no).toMatch(/^SO\d{8}-\d{4}$/);
-  });
-
-  it("流水随机：多次生成不应全部相同", () => {
-    const nos = new Set(Array.from({ length: 20 }, () => makeBookingReceipt().so_no));
-    expect(nos.size).toBeGreaterThan(1);
   });
 });
