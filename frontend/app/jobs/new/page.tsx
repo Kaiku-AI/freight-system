@@ -1,18 +1,7 @@
-import Link from "next/link";
-
 import JobForm from "../_components/JobForm";
 
 // 新建整箱作业（DESIGN §6：写入；job_no 由后端生成）。
+// 页面标题/返回入口由 JobForm 内的云海窗体（标题栏 + 关闭）承担。
 export default function NewJobPage() {
-  return (
-    <div className="mx-auto max-w-7xl">
-      <div className="mb-5 flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-ink">新建整箱</h1>
-        <Link href="/jobs" className="text-sm text-muted hover:text-brand">
-          返回列表
-        </Link>
-      </div>
-      <JobForm />
-    </div>
-  );
+  return <JobForm />;
 }

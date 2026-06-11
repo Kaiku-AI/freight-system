@@ -3,19 +3,25 @@
 /* 设计令牌（取自 Penpot 视觉稿，DESIGN §0：Penpot 仅样式参考）。
    命名色 → Tailwind 自动生成 bg-/text-/border- 等工具类，全站单一来源。 */
 @theme {
-  --color-brand: #29b6f6; /* 主色：按钮/链接/激活态 */
+  --color-brand: #29b6f6; /* 主色：按钮/链接/激活态（云海蓝） */
   --color-brand-dark: #14a3e8; /* 主色 hover */
   --color-brand-soft: #e6f6fe; /* 主色浅底：激活导航/高亮项 */
+  --color-topbar: #2aa3e8; /* 顶栏蓝（云海软件演示栏） */
+  --color-topbar-dark: #1f86c9; /* 顶栏渐变深端 */
+  --color-accent: #ff8c1a; /* 强调橙：激活页签下划线 / 操作类链接（云海橙） */
+  --color-accent-soft: #fff2e3; /* 橙浅底 */
   --color-ink: #161823; /* 标题文本 */
   --color-body: #3d4150; /* 正文文本 */
   --color-muted: #8a91a6; /* 次要文本/标签 */
   --color-faint: #aab0c2; /* 占位/弱化文本 */
-  --color-line: #eaedf4; /* 描边/分隔线 */
+  --color-line: #e3e8f1; /* 描边/分隔线 */
   --color-line-strong: #c2c7d6; /* 强描边 */
   --color-canvas: #f4f6fb; /* 页面底色 */
+  --color-panel: #d5e6f8; /* 表单分块淡蓝底（云海表单面板） */
+  --color-panel-line: #b9d4ee; /* 面板内输入描边/分隔线 */
   --color-field: #f2f4f9; /* 只读/禁用输入底 */
-  --color-required: #eef7fd; /* 必填项浅天蓝底 */
-  --color-required-line: #bfe1f4; /* 必填项天蓝描边 */
+  --color-required: #fdf3e3; /* 必填/重点项米黄底（云海） */
+  --color-required-line: #ecd9b5; /* 必填项米黄描边 */
   --color-star: #f04a6e; /* 必填红星/危险 */
 }
 

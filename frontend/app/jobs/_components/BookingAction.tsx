@@ -14,6 +14,7 @@ export default function BookingAction() {
   const [phase, setPhase] = useState<Phase | null>(null);
   const [hint, setHint] = useState("");
   const ref = useRef<HTMLDivElement>(null);
+  const bookingTimer = useRef<number | null>(null);
 
   // 点菜单外关闭。
   useEffect(() => {
@@ -32,10 +33,17 @@ export default function BookingAction() {
     return () => window.clearTimeout(t);
   }, [hint]);
 
+  useEffect(() => {
+    return () => {
+      if (bookingTimer.current != null) window.clearTimeout(bookingTimer.current);
+    };
+  }, []);
+
   function startBooking() {
     setOpen(false);
     setPhase("sending");
-    window.setTimeout(() => setPhase("sent"), 1300); // 模拟向船公司发送的时延
+    if (bookingTimer.current != null) window.clearTimeout(bookingTimer.current);
+    bookingTimer.current = window.setTimeout(() => setPhase("sent"), 1300); // 模拟向船公司发送的时延
   }
 
   function pick(action: string) {
@@ -49,13 +57,13 @@ export default function BookingAction() {
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="rounded-lg border border-line px-3 py-1.5 text-sm text-body transition-colors hover:bg-canvas"
+        className="rounded px-2 py-1 text-[13px] leading-5 whitespace-nowrap text-body transition-colors hover:bg-canvas hover:text-brand"
       >
         动作 ▾
       </button>
 
       {open && (
-        <div className="absolute top-full left-0 z-20 mt-1 w-36 overflow-hidden rounded-lg border border-line bg-white py-1 shadow-lg">
+        <div className="absolute top-full left-0 z-20 mt-1 w-36 overflow-hidden rounded border border-line-strong bg-white py-1 shadow-lg">
           {ACTIONS.map((a) => (
             <button
               key={a}
@@ -70,7 +78,7 @@ export default function BookingAction() {
       )}
 
       {hint && (
-        <div className="absolute top-full left-0 z-20 mt-1 rounded-lg bg-ink px-3 py-1.5 text-xs whitespace-nowrap text-white shadow">
+        <div className="absolute top-full left-0 z-20 mt-1 rounded bg-ink px-3 py-1.5 text-xs whitespace-nowrap text-white shadow">
           {hint}
         </div>
       )}
@@ -83,16 +91,19 @@ export default function BookingAction() {
 // 订舱弹窗：发送中（转圈）→ 已发送（仅告知指令送达，不写订舱成功、不回填）。
 function BookingModal({ phase, onClose }: { phase: Phase; onClose: () => void }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4">
-      <div className="w-full max-w-md rounded-2xl border border-line bg-white p-7 shadow-xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/25 p-4">
+      <div className="w-full max-w-[420px] overflow-hidden rounded border border-line-strong bg-white shadow-xl">
+        <div className="bg-gradient-to-r from-topbar to-topbar-dark px-4 py-2 text-sm font-semibold text-white">
+          订舱指令
+        </div>
         {phase === "sending" ? (
-          <div className="flex flex-col items-center gap-4 py-4 text-center">
+          <div className="flex flex-col items-center gap-4 px-8 py-8 text-center">
             <span className="h-9 w-9 animate-spin rounded-full border-[3px] border-line border-t-brand" />
             <p className="text-sm text-body">正在向船公司发送订舱 EDI…</p>
           </div>
         ) : (
-          <div className="flex flex-col items-center gap-4 py-2 text-center">
-            <span className="flex h-12 w-12 items-center justify-center rounded-full bg-brand-soft">
+          <div className="flex flex-col items-center gap-4 px-8 py-8 text-center">
+            <span className="flex h-12 w-12 items-center justify-center rounded-full border border-panel-line bg-white">
               <svg viewBox="0 0 24 24" fill="none" className="h-6 w-6 text-brand">
                 <path
                   d="M5 12.5l4.2 4.2L19 7"
@@ -108,7 +119,7 @@ function BookingModal({ phase, onClose }: { phase: Phase; onClose: () => void })
             <button
               type="button"
               onClick={onClose}
-              className="mt-1 rounded-lg bg-brand px-6 py-1.5 text-sm font-medium text-white transition-colors hover:bg-brand-dark"
+              className="mt-1 rounded bg-brand px-8 py-1.5 text-sm font-medium text-white transition-colors hover:bg-brand-dark"
             >
               知道了
             </button>

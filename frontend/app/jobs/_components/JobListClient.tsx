@@ -14,7 +14,7 @@ import {
   statusBadgeClass,
   statusLabel,
 } from "./fields";
-import { ToolbarDivider, ToolbarGhost } from "./Toolbar";
+import { ToolbarDivider, ToolbarGhost, WindowTitleBar } from "./Toolbar";
 
 const PAGE_SIZE = 20;
 
@@ -126,19 +126,19 @@ export default function JobListClient() {
   const to = Math.min(offset + PAGE_SIZE, total);
 
   const inputCls =
-    "rounded-lg border border-line bg-white px-3 py-1.5 text-sm text-ink outline-none transition-colors focus:border-brand";
+    "rounded border border-panel-line bg-white px-3 py-1.5 text-sm text-ink outline-none transition-colors focus:border-brand";
 
   return (
-    <div className="mx-auto max-w-7xl">
-      <h1 className="mb-4 text-2xl font-semibold text-ink">作业列表</h1>
+    <div className="border border-line bg-white">
+      <WindowTitleBar title="作业列表/海运出口" caption={`共 ${total} 票`} />
 
-      {/* 顶部工具栏（还原 Penpot）：新建可用，其余仅展示 */}
-      <div className="mb-5 flex flex-wrap items-center gap-2 rounded-2xl border border-line bg-white p-3">
+      {/* 顶部工具栏（还原云海）：新建可用，其余仅展示 */}
+      <div className="flex items-center gap-1 overflow-x-auto border-b border-line px-2 py-1.5">
         <Link
           href="/jobs/new"
-          className="rounded-lg bg-brand px-4 py-1.5 text-sm font-medium text-white transition-colors hover:bg-brand-dark"
+          className="rounded bg-brand px-3 py-1 text-[13px] font-medium whitespace-nowrap text-white transition-colors hover:bg-brand-dark"
         >
-          + 新建整箱
+          新建整箱
         </Link>
         <ToolbarGhost items={["复制", "删除"]} />
         <ToolbarDivider />
@@ -147,198 +147,187 @@ export default function JobListClient() {
         />
       </div>
 
-      {/* 筛选条——值由 name 还原进 URL query */}
-      <form
-        onSubmit={onSearch}
-        className="mb-5 rounded-2xl border border-line bg-white p-5"
-      >
-        <h2 className="mb-4 flex items-center gap-2 text-sm font-semibold text-ink">
-          <span className="h-3.5 w-1 rounded-full bg-brand" />
-          筛选条件
-        </h2>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-          {TEXT_FILTERS.map(({ key, label }) => (
-            <label key={key} className="flex flex-col gap-1 text-xs text-muted">
-              {label}
+      <div className="space-y-2.5 p-3">
+        {/* 筛选条——值由 name 还原进 URL query */}
+        <form onSubmit={onSearch} className="bg-panel p-3">
+          <h2 className="mb-2.5 text-sm font-bold text-ink">筛选条件</h2>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+            {TEXT_FILTERS.map(({ key, label }) => (
+              <label key={key} className="flex flex-col gap-1 text-xs text-muted">
+                {label}
+                <input
+                  name={key}
+                  defaultValue={searchParams.get(key) ?? ""}
+                  className={inputCls}
+                />
+              </label>
+            ))}
+            <label className="flex flex-col gap-1 text-xs text-muted">
+              出运状态
+              <select
+                name="status"
+                defaultValue={searchParams.get("status") ?? ""}
+                className={inputCls}
+              >
+                <option value="">全部</option>
+                {STATUS_OPTIONS.map((o) => (
+                  <option key={o.value} value={o.value}>
+                    {o.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="flex flex-col gap-1 text-xs text-muted">
+              ETD 从
               <input
-                name={key}
-                defaultValue={searchParams.get(key) ?? ""}
+                type="date"
+                name="etd_from"
+                defaultValue={searchParams.get("etd_from") ?? ""}
                 className={inputCls}
               />
             </label>
-          ))}
-          <label className="flex flex-col gap-1 text-xs text-muted">
-            出运状态
-            <select
-              name="status"
-              defaultValue={searchParams.get("status") ?? ""}
-              className={inputCls}
+            <label className="flex flex-col gap-1 text-xs text-muted">
+              ETD 至
+              <input
+                type="date"
+                name="etd_to"
+                defaultValue={searchParams.get("etd_to") ?? ""}
+                className={inputCls}
+              />
+            </label>
+          </div>
+          <div className="mt-3 flex justify-end gap-2">
+            <button
+              type="button"
+              onClick={onReset}
+              className="rounded border border-line-strong bg-white px-4 py-1 text-[13px] text-body transition-colors hover:bg-canvas"
             >
-              <option value="">全部</option>
-              {STATUS_OPTIONS.map((o) => (
-                <option key={o.value} value={o.value}>
-                  {o.label}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="flex flex-col gap-1 text-xs text-muted">
-            ETD 从
-            <input
-              type="date"
-              name="etd_from"
-              defaultValue={searchParams.get("etd_from") ?? ""}
-              className={inputCls}
-            />
-          </label>
-          <label className="flex flex-col gap-1 text-xs text-muted">
-            ETD 至
-            <input
-              type="date"
-              name="etd_to"
-              defaultValue={searchParams.get("etd_to") ?? ""}
-              className={inputCls}
-            />
-          </label>
-        </div>
-        <div className="mt-4 flex justify-end gap-2">
-          <button
-            type="button"
-            onClick={onReset}
-            className="rounded-lg border border-line-strong px-4 py-1.5 text-sm text-body transition-colors hover:bg-canvas"
-          >
-            重置
-          </button>
-          <button
-            type="submit"
-            className="rounded-lg bg-brand px-4 py-1.5 text-sm font-medium text-white transition-colors hover:bg-brand-dark"
-          >
-            搜索
-          </button>
-        </div>
-      </form>
+              重置
+            </button>
+            <button
+              type="submit"
+              className="rounded bg-brand px-4 py-1 text-[13px] font-medium text-white transition-colors hover:bg-brand-dark"
+            >
+              搜索
+            </button>
+          </div>
+        </form>
 
-      {error && <p className="mb-4 text-sm text-star">{error}</p>}
+        {error && <p className="text-sm text-star">{error}</p>}
 
-      <div className="rounded-2xl border border-line bg-white">
-        <div className="flex items-center justify-between px-5 py-4">
-          <h2 className="flex items-center gap-2 text-sm font-semibold text-ink">
-            <span className="h-3.5 w-1 rounded-full bg-brand" />
-            作业列表
-          </h2>
-          <span className="text-xs text-muted">{`共 ${total} 票`}</span>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="min-w-[1500px] w-full text-left text-sm">
-            <thead className="border-y border-line bg-canvas text-xs text-muted">
-              <tr>
-                <th className="px-4 py-3 font-medium">作业号</th>
-                <th className="px-4 py-3 font-medium">委托人</th>
-                <th className="px-4 py-3 font-medium">船名·航次</th>
-                <th className="px-4 py-3 font-medium">MB/L No.</th>
-                <th className="px-4 py-3 font-medium">起运港</th>
-                <th className="px-4 py-3 font-medium">目的地</th>
-                <th className="px-4 py-3 font-medium">ETD</th>
-                <th className="px-4 py-3 font-medium">出运状态</th>
-                {CONFIRMATION_FLAGS.map((f) => (
-                  <th key={f.name} className="px-3 py-3 text-center font-medium">
-                    {f.label}
-                  </th>
-                ))}
-                <th className="px-4 py-3 text-center font-medium">拖车</th>
-                <th className="px-4 py-3 text-center font-medium">报关</th>
-                <th className="px-4 py-3 text-right font-medium">操作</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-line">
-              {loading ? (
+        <div className="border border-line">
+          <div className="overflow-x-auto">
+            <table className="min-w-[1500px] w-full text-left text-sm">
+              <thead className="border-y border-line bg-canvas text-xs text-muted">
                 <tr>
-                  <td colSpan={17} className="px-4 py-10 text-center text-faint">
-                    加载中…
-                  </td>
+                  <th className="px-4 py-3 font-medium">作业号</th>
+                  <th className="px-4 py-3 font-medium">委托人</th>
+                  <th className="px-4 py-3 font-medium">船名·航次</th>
+                  <th className="px-4 py-3 font-medium">MB/L No.</th>
+                  <th className="px-4 py-3 font-medium">起运港</th>
+                  <th className="px-4 py-3 font-medium">目的地</th>
+                  <th className="px-4 py-3 font-medium">ETD</th>
+                  <th className="px-4 py-3 font-medium">出运状态</th>
+                  {CONFIRMATION_FLAGS.map((f) => (
+                    <th key={f.name} className="px-3 py-3 text-center font-medium">
+                      {f.label}
+                    </th>
+                  ))}
+                  <th className="px-4 py-3 text-center font-medium">拖车</th>
+                  <th className="px-4 py-3 text-center font-medium">报关</th>
+                  <th className="px-4 py-3 text-right font-medium">操作</th>
                 </tr>
-              ) : jobs.length === 0 ? (
-                <tr>
-                  <td colSpan={17} className="px-4 py-10 text-center text-faint">
-                    暂无作业
-                  </td>
-                </tr>
-              ) : (
-                jobs.map((job) => (
-                  <tr key={job.id} className="hover:bg-canvas">
-                    <td className="px-4 py-3">
-                      <Link
-                        href={`/jobs/${job.id}`}
-                        className="font-medium text-brand hover:text-brand-dark"
-                      >
-                        {job.job_no}
-                      </Link>
-                    </td>
-                    <td className="px-4 py-3">{job.consignor}</td>
-                    <td className="px-4 py-3">
-                      {[job.vessel, job.voyage].filter(Boolean).join(" · ") || "-"}
-                    </td>
-                    <td className="px-4 py-3">{job.mbl_no || "-"}</td>
-                    <td className="px-4 py-3">{job.pol || "-"}</td>
-                    <td className="px-4 py-3">{job.final_destination || "-"}</td>
-                    <td className="px-4 py-3">{fmtDate(job.etd)}</td>
-                    <td className="px-4 py-3">
-                      <span
-                        className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${statusBadgeClass(job.status)}`}
-                      >
-                        {statusLabel(job.status)}
-                      </span>
-                    </td>
-                    {CONFIRMATION_FLAGS.map((f) => (
-                      <td key={f.name} className="px-3 py-3 text-center">
-                        <Flag on={Boolean(job[f.name])} label={f.label} />
-                      </td>
-                    ))}
-                    <td className="px-4 py-3 text-center">
-                      <Flag on={job.trucking} label="拖车" />
-                    </td>
-                    <td className="px-4 py-3 text-center">
-                      <Flag on={job.customs_declare} label="报关" />
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      <button
-                        type="button"
-                        onClick={() => onDelete(job)}
-                        className="rounded-lg border border-line-strong px-2.5 py-1 text-xs text-star transition-colors hover:bg-[#fef2f4]"
-                      >
-                        删除
-                      </button>
+              </thead>
+              <tbody className="divide-y divide-line">
+                {loading ? (
+                  <tr>
+                    <td colSpan={17} className="px-4 py-10 text-center text-faint">
+                      加载中…
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ) : jobs.length === 0 ? (
+                  <tr>
+                    <td colSpan={17} className="px-4 py-10 text-center text-faint">
+                      暂无作业
+                    </td>
+                  </tr>
+                ) : (
+                  jobs.map((job) => (
+                    <tr key={job.id} className="hover:bg-canvas">
+                      <td className="px-4 py-3">
+                        <Link
+                          href={`/jobs/${job.id}`}
+                          className="font-medium text-brand hover:text-brand-dark"
+                        >
+                          {job.job_no}
+                        </Link>
+                      </td>
+                      <td className="px-4 py-3">{job.consignor}</td>
+                      <td className="px-4 py-3">
+                        {[job.vessel, job.voyage].filter(Boolean).join(" · ") || "-"}
+                      </td>
+                      <td className="px-4 py-3">{job.mbl_no || "-"}</td>
+                      <td className="px-4 py-3">{job.pol || "-"}</td>
+                      <td className="px-4 py-3">{job.final_destination || "-"}</td>
+                      <td className="px-4 py-3">{fmtDate(job.etd)}</td>
+                      <td className="px-4 py-3">
+                        <span
+                          className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${statusBadgeClass(job.status)}`}
+                        >
+                          {statusLabel(job.status)}
+                        </span>
+                      </td>
+                      {CONFIRMATION_FLAGS.map((f) => (
+                        <td key={f.name} className="px-3 py-3 text-center">
+                          <Flag on={Boolean(job[f.name])} label={f.label} />
+                        </td>
+                      ))}
+                      <td className="px-4 py-3 text-center">
+                        <Flag on={job.trucking} label="拖车" />
+                      </td>
+                      <td className="px-4 py-3 text-center">
+                        <Flag on={job.customs_declare} label="报关" />
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        <button
+                          type="button"
+                          onClick={() => onDelete(job)}
+                          className="rounded border border-line-strong px-2.5 py-1 text-xs text-star transition-colors hover:bg-[#fef2f4]"
+                        >
+                          删除
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
 
-      {/* 分页 */}
-      <div className="mt-4 flex items-center justify-between text-sm text-muted">
-        <span>
-          {total > 0 ? `第 ${from}–${to} 条，共 ${total} 条` : "共 0 条"}
-        </span>
-        <div className="flex gap-2">
-          <button
-            type="button"
-            disabled={offset <= 0}
-            onClick={() => goPage(offset - PAGE_SIZE)}
-            className="rounded-lg border border-line-strong px-3 py-1.5 text-body transition-colors hover:bg-canvas disabled:opacity-40"
-          >
-            上一页
-          </button>
-          <button
-            type="button"
-            disabled={to >= total}
-            onClick={() => goPage(offset + PAGE_SIZE)}
-            className="rounded-lg border border-line-strong px-3 py-1.5 text-body transition-colors hover:bg-canvas disabled:opacity-40"
-          >
-            下一页
-          </button>
+        {/* 分页 */}
+        <div className="flex items-center justify-between text-sm text-muted">
+          <span>
+            {total > 0 ? `第 ${from}–${to} 条，共 ${total} 条` : "共 0 条"}
+          </span>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              disabled={offset <= 0}
+              onClick={() => goPage(offset - PAGE_SIZE)}
+              className="rounded border border-line-strong px-3 py-1 text-body transition-colors hover:bg-canvas disabled:opacity-40"
+            >
+              上一页
+            </button>
+            <button
+              type="button"
+              disabled={to >= total}
+              onClick={() => goPage(offset + PAGE_SIZE)}
+              className="rounded border border-line-strong px-3 py-1 text-body transition-colors hover:bg-canvas disabled:opacity-40"
+            >
+              下一页
+            </button>
+          </div>
         </div>
       </div>
     </div>

@@ -10,7 +10,7 @@ export default function JobTabs({
   onSelect: (name: string) => void;
 }) {
   return (
-    <div className="mb-5 flex flex-wrap border-b border-line">
+    <div className="flex flex-wrap items-end gap-1 border-b border-panel-line px-2 pt-2">
       {JOB_TABS.map((tab) => {
         const isActive = tab.name === active;
         return (
@@ -18,10 +18,10 @@ export default function JobTabs({
             key={tab.name}
             type="button"
             onClick={() => onSelect(tab.name)}
-            className={`-mb-px border-b-2 px-3 pb-2.5 text-sm transition-colors ${
+            className={`-mb-px rounded-t px-3.5 py-1.5 text-[13px] transition-colors ${
               isActive
-                ? "border-brand font-medium text-brand"
-                : "border-transparent text-muted hover:text-brand"
+                ? "border border-panel-line border-b-panel bg-panel font-semibold text-ink"
+                : "border border-transparent text-body hover:text-brand"
             }`}
           >
             {tab.name}
@@ -36,7 +36,7 @@ export default function JobTabs({
 export function TabPlaceholder({ name }: { name: string }) {
   return (
     <div className="flex flex-col items-center justify-center gap-2 py-16 text-center">
-      <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-soft text-brand">
+      <span className="flex h-12 w-12 items-center justify-center rounded border border-panel-line bg-white text-muted">
         <svg
           viewBox="0 0 24 24"
           fill="none"

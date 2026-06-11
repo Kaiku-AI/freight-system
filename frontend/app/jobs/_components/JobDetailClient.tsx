@@ -5,11 +5,12 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { deleteJob, getJob } from "@/lib/api";
-import type { Job, JobBase } from "@/types/job";
+import type { Job } from "@/types/job";
 
 import JobForm from "./JobForm";
 import JobTabs, { DEFAULT_TAB, TabPlaceholder } from "./JobTabs";
 import JobToolbar from "./JobToolbar";
+import JobWindow from "./JobWindow";
 import {
   BASIC_FIELDS,
   CONFIRMATION_FLAGS,
@@ -78,147 +79,102 @@ export default function JobDetailClient({ id }: { id: number }) {
     );
   if (!job) return null;
 
+  if (editing) {
+    return (
+      <JobForm
+        job={job}
+        onCancel={() => setEditing(false)}
+        onSaved={(saved) => {
+          setJob(saved);
+          setEditing(false);
+        }}
+      />
+    );
+  }
+
   return (
-    <div className="mx-auto max-w-7xl">
-      <div className="mb-5 flex items-center justify-between">
-        <div>
-          <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-semibold text-ink">{job.job_no}</h1>
-            <span
-              className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${statusBadgeClass(job.status)}`}
-            >
-              {statusLabel(job.status)}
-            </span>
-          </div>
-          <p className="mt-1 text-sm text-muted">{job.consignor}</p>
-        </div>
-        <div className="flex gap-2">
-          {!editing && (
-            <>
-              <button
-                type="button"
-                onClick={() => setEditing(true)}
-                className="rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-brand-dark"
-              >
-                编辑
-              </button>
-              <button
-                type="button"
-                onClick={onDelete}
-                className="rounded-lg border border-line-strong px-4 py-2 text-sm text-star transition-colors hover:bg-[#fef2f4]"
-              >
-                删除
-              </button>
-            </>
-          )}
-          <Link href="/jobs" className="self-center text-sm text-muted hover:text-brand">
-            返回列表
-          </Link>
-        </div>
-      </div>
-
-      {error && <p className="mb-4 text-sm text-star">{error}</p>}
-
-      {editing ? (
-        <JobForm
-          job={job}
-          onCancel={() => setEditing(false)}
-          onSaved={(saved) => {
-            setJob(saved);
-            setEditing(false);
-          }}
-        />
-      ) : (
-        <div className="space-y-6">
-          {/* 查看态也显示工具栏：保存/放弃灰显，「动作」可点（查看时也能发起订舱）。*/}
-          <JobToolbar mode="view" />
-          <ConfirmationCard job={job} />
-          <SectionShell title="基本信息">
-            <FieldGrid fields={BASIC_FIELDS} job={job} />
-          </SectionShell>
-          <ReadFlags job={job} />
-          {/* 托单信息及其余子页签（仅托单信息有内容，其余本区域内显示「暂未开放」）*/}
-          <section className="rounded-2xl border border-line bg-white p-5">
-            <JobTabs active={tab} onSelect={setTab} />
-            {tab === DEFAULT_TAB ? (
-              <FieldGrid fields={CONSIGNMENT_FIELDS} job={job} />
-            ) : (
-              <TabPlaceholder name={tab} />
-            )}
-          </section>
-        </div>
+    <JobWindow
+      caption={
+        <>
+          {job.job_no}
+          <span
+            className={`inline-flex rounded-full px-2 py-0.5 text-[11px] font-medium ${statusBadgeClass(job.status)}`}
+          >
+            {statusLabel(job.status)}
+          </span>
+        </>
+      }
+      onDelete={onDelete}
+      onClose={() => router.push("/jobs")}
+      toolbar={<JobToolbar mode="view" onEdit={() => setEditing(true)} />}
+    >
+      {error && (
+        <p className="border border-[#f7c9d4] bg-[#fef2f4] px-4 py-2 text-sm text-star">{error}</p>
       )}
-    </div>
+
+      <SectionShell title="作业确认状态">
+        <FlagGrid flags={CONFIRMATION_FLAGS} job={job} />
+      </SectionShell>
+
+      {/* 基本信息 + 服务标志同处一块淡蓝面板（与编辑表单同构） */}
+      <SectionShell title="基本信息">
+        <FieldGrid fields={BASIC_FIELDS} job={job} />
+        <div className="mt-3 border-t border-panel-line/70 pt-3">
+          <FlagGrid flags={SERVICE_FLAGS} job={job} />
+        </div>
+      </SectionShell>
+
+      {/* 托单信息及其余子页签（仅托单信息有内容，其余本区域内显示「暂未开放」）*/}
+      <section>
+        <JobTabs active={tab} onSelect={setTab} />
+        <div className="bg-panel p-3">
+          {tab === DEFAULT_TAB ? (
+            <FieldGrid fields={CONSIGNMENT_FIELDS} job={job} />
+          ) : (
+            <TabPlaceholder name={tab} />
+          )}
+        </div>
+      </section>
+    </JobWindow>
   );
 }
 
+// 分块面板：淡蓝底整块 + 块内粗体标题（与 JobForm 一致，还原云海表单分块）。
 function SectionShell({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="rounded-2xl border border-line bg-white p-5">
-      <h2 className="mb-5 flex items-center gap-2 text-sm font-semibold text-ink">
-        <span className="h-3.5 w-1 rounded-full bg-brand" />
-        {title}
-      </h2>
+    <section className="bg-panel p-3">
+      <h2 className="mb-2.5 text-sm font-bold text-ink">{title}</h2>
       {children}
     </section>
   );
 }
 
-// 只读字段网格（基本信息/托单信息共用）。
+// 只读字段网格（标签左、值右的密排行；基本信息/托单信息共用）。
 function FieldGrid({ fields, job }: { fields: FieldDef[]; job: Job }) {
   return (
-    <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+    <dl className="grid grid-cols-1 gap-x-5 gap-y-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       {fields.map((f) => (
-        <div key={f.name} className={f.full ? "col-span-full" : ""}>
-          <dt className="text-xs text-muted">{f.label}</dt>
-          <dd className="mt-0.5 text-sm whitespace-pre-wrap text-ink">{displayValue(job, f)}</dd>
+        <div key={f.name} className={`flex items-baseline gap-2 ${f.full ? "col-span-full" : ""}`}>
+          <dt className="w-20 shrink-0 text-xs text-body">{f.label}</dt>
+          <dd className="min-w-0 flex-1 text-sm whitespace-pre-wrap text-ink">
+            {displayValue(job, f)}
+          </dd>
         </div>
       ))}
     </dl>
   );
 }
 
-function ConfirmationCard({ job }: { job: Job }) {
+// 只读勾选网格（确认状态/服务标志共用，与表单同一视觉语言）。
+function FlagGrid({ flags, job }: { flags: FieldDef[]; job: Job }) {
   return (
-    <SectionShell title="作业确认状态">
-      <div className="grid grid-cols-2 gap-x-4 gap-y-2.5 text-sm sm:grid-cols-3 lg:grid-cols-6">
-        {CONFIRMATION_FLAGS.map((n) => {
-          const checked = Boolean(job[n.name]);
-          return (
-            <span key={n.name} className="flex items-center gap-2 text-body">
-              <input
-                type="checkbox"
-                checked={checked}
-                readOnly
-                className="check-brand"
-              />
-              {n.label}
-            </span>
-          );
-        })}
-      </div>
-    </SectionShell>
-  );
-}
-
-function ReadFlags({ job }: { job: Job }) {
-  const active = SERVICE_FLAGS.filter((f) => Boolean(job[f.name as keyof JobBase]));
-  return (
-    <SectionShell title="服务标志">
-      {active.length === 0 ? (
-        <p className="text-sm text-faint">无</p>
-      ) : (
-        <div className="flex flex-wrap gap-2">
-          {active.map((f) => (
-            <span
-              key={f.name}
-              className="rounded-full bg-brand-soft px-3 py-1 text-xs font-medium text-brand"
-            >
-              {f.label}
-            </span>
-          ))}
-        </div>
-      )}
-    </SectionShell>
+    <div className="grid grid-cols-2 gap-x-4 gap-y-2.5 text-sm sm:grid-cols-3 lg:grid-cols-6">
+      {flags.map((f) => (
+        <span key={f.name} className="flex items-center gap-2 text-body">
+          <input type="checkbox" checked={Boolean(job[f.name])} readOnly className="check-brand" />
+          {f.label}
+        </span>
+      ))}
+    </div>
   );
 }

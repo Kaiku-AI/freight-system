@@ -4,7 +4,7 @@ import Link from "next/link";
 export default function Unavailable() {
   return (
     <div className="flex flex-1 flex-col items-center justify-center py-32 text-center">
-      <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-soft text-brand">
+      <span className="flex h-14 w-14 items-center justify-center rounded border border-line-strong bg-white text-muted">
         <svg
           viewBox="0 0 24 24"
           fill="none"
