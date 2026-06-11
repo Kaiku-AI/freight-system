@@ -90,7 +90,7 @@ export default function JobForm({
                 type="checkbox"
                 checked={Boolean(state[f.name])}
                 onChange={(e) => set(f.name, e.target.checked)}
-                className="h-4 w-4 rounded border-line-strong accent-brand"
+                className="check-brand"
               />
               {f.label}
             </label>
@@ -135,7 +135,7 @@ function ConfirmationCard({
               type="checkbox"
               checked={Boolean(state[f.name])}
               onChange={(e) => onChange(f.name, e.target.checked)}
-              className="h-4 w-4 rounded border-line-strong accent-brand"
+              className="check-brand"
             />
             {f.label}
           </label>

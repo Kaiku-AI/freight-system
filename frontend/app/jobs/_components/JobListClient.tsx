@@ -36,7 +36,7 @@ function Flag({ on, label }: { on: boolean; label: string }) {
       aria-label={label}
       checked={on}
       readOnly
-      className="h-4 w-4 rounded border-line-strong accent-brand"
+      className="check-brand"
     />
   );
 }

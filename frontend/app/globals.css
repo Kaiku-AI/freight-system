@@ -14,8 +14,8 @@
   --color-line-strong: #c2c7d6; /* 强描边 */
   --color-canvas: #f4f6fb; /* 页面底色 */
   --color-field: #f2f4f9; /* 只读/禁用输入底 */
-  --color-required: #fffbf1; /* 必填项黄底 */
-  --color-required-line: #f0e0b8; /* 必填项描边 */
+  --color-required: #eef7fd; /* 必填项浅天蓝底 */
+  --color-required-line: #bfe1f4; /* 必填项天蓝描边 */
   --color-star: #f04a6e; /* 必填红星/危险 */
 }
 
@@ -28,4 +28,30 @@ body {
   background: var(--color-canvas);
   color: var(--color-body);
   font-family: system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+}
+
+/* 全站勾选框：白底 → 选中天蓝底 + 白对勾（替代原生 accent-color，避免亮色下浏览器渲染黑对勾）。 */
+.check-brand {
+  height: 1rem;
+  width: 1rem;
+  flex-shrink: 0;
+  appearance: none;
+  -webkit-appearance: none;
+  border-radius: 0.25rem;
+  border: 1px solid var(--color-line-strong);
+  background-color: #fff;
+  cursor: pointer;
+  transition: background-color 0.15s, border-color 0.15s;
+}
+.check-brand:checked {
+  border-color: var(--color-brand);
+  background-color: var(--color-brand);
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><path d='M3.5 8.5l3 3 6-6.5'/></svg>");
+  background-size: 0.7rem;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+.check-brand:disabled {
+  cursor: default;
+  opacity: 0.65;
 }

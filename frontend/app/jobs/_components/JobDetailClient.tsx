@@ -190,7 +190,7 @@ function ConfirmationCard({ job }: { job: Job }) {
                 type="checkbox"
                 checked={checked}
                 readOnly
-                className="h-4 w-4 rounded border-line-strong accent-brand"
+                className="check-brand"
               />
               {n.label}
             </span>
