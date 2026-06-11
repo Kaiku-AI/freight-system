@@ -43,7 +43,7 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-screen">
       {/* 左：品牌展示（DESIGN §0 Penpot 样式参考）*/}
-      <div className="relative hidden w-1/2 flex-col justify-between overflow-hidden bg-gradient-to-br from-brand to-[#7c74ee] p-14 text-white lg:flex">
+      <div className="relative hidden w-1/2 flex-col justify-between overflow-hidden bg-gradient-to-br from-brand to-[#6fd3fa] p-14 text-white lg:flex">
         <span className="absolute -top-20 -left-16 h-72 w-72 rounded-full bg-white/10" />
         <span className="absolute right-10 bottom-24 h-44 w-44 rounded-full bg-white/10" />
 
@@ -52,8 +52,8 @@ export default function LoginPage() {
             运
           </span>
           <span className="leading-tight">
-            <span className="block text-lg font-semibold">海运出口订舱</span>
-            <span className="block text-xs text-white/70">国际货运代理平台</span>
+            <span className="block text-lg font-semibold">国际货运代理</span>
+            <span className="block text-xs text-white/70">海运进出口业务平台</span>
           </span>
         </div>
 
@@ -64,7 +64,7 @@ export default function LoginPage() {
             高效流转
           </h2>
           <p className="mt-5 max-w-sm text-sm leading-relaxed text-white/80">
-            一站式管理海运出口订舱、报关、提单与费用结算，让业务全流程在线协同、清晰可控。
+            一站式管理海运进出口订舱、报关、提单与费用结算，让业务全流程在线协同、清晰可控。
           </p>
           <ul className="mt-9 space-y-3.5 text-sm text-white/90">
             {["订舱 · 报关 · 提单全链路打通", "实时掌握作业进度与费用结算", "多角色协同，数据安全可控"].map((t) => (
@@ -78,13 +78,13 @@ export default function LoginPage() {
           </ul>
         </div>
 
-        <p className="relative text-xs text-white/50">© 2026 海运出口订舱 · 国际货运代理平台</p>
+        <p className="relative text-xs text-white/50">© 2026 国际货运代理 · 海运进出口业务平台</p>
       </div>
 
       {/* 右：登录表单 */}
       <div className="flex w-full items-center justify-center bg-white px-6 lg:w-1/2">
         <form onSubmit={onSubmit} className="w-full max-w-sm">
-          <h1 className="text-2xl font-bold text-ink">欢迎回来 👋</h1>
+          <h1 className="text-2xl font-bold text-ink">账户登录</h1>
           <p className="mt-2 text-sm text-muted">请登录您的账户，继续管理您的货代业务</p>
 
           <label className="mt-8 mb-1.5 block text-sm font-medium text-body">账号</label>

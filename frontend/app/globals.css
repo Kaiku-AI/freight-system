@@ -3,9 +3,9 @@
 /* 设计令牌（取自 Penpot 视觉稿，DESIGN §0：Penpot 仅样式参考）。
    命名色 → Tailwind 自动生成 bg-/text-/border- 等工具类，全站单一来源。 */
 @theme {
-  --color-brand: #5b5bd6; /* 主色：按钮/链接/激活态 */
-  --color-brand-dark: #4a4acb; /* 主色 hover */
-  --color-brand-soft: #eef0ff; /* 主色浅底：激活导航/高亮项 */
+  --color-brand: #29b6f6; /* 主色：按钮/链接/激活态 */
+  --color-brand-dark: #14a3e8; /* 主色 hover */
+  --color-brand-soft: #e6f6fe; /* 主色浅底：激活导航/高亮项 */
   --color-ink: #161823; /* 标题文本 */
   --color-body: #3d4150; /* 正文文本 */
   --color-muted: #8a91a6; /* 次要文本/标签 */

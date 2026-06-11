@@ -17,7 +17,7 @@ export default function Home() {
             <div>
               <h1 className="text-lg font-semibold text-ink">海运出口</h1>
               <p className="mt-0.5 text-sm text-muted">
-                Sea Freight Export · 选择要进入的功能模块
+                国际货运代理 · 选择要进入的功能模块
               </p>
             </div>
           </div>

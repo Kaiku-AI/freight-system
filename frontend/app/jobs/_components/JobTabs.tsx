@@ -36,11 +36,24 @@ export default function JobTabs({
 export function TabPlaceholder({ name }: { name: string }) {
   return (
     <div className="flex flex-col items-center justify-center gap-2 py-16 text-center">
-      <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-soft text-xl">
-        🚧
+      <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-soft text-brand">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={1.8}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="h-5 w-5"
+          aria-hidden
+        >
+          <rect x="2.5" y="7.5" width="19" height="5" rx="1" />
+          <path d="M7 7.5 4 12.5M12.5 7.5 9.5 12.5M18 7.5 15 12.5" />
+          <path d="M6 12.5V21M18 12.5V21" />
+        </svg>
       </span>
       <p className="text-sm font-medium text-ink">「{name}」暂未开放</p>
-      <p className="text-xs text-muted">该子页签正在规划中，敬请期待。</p>
+      <p className="text-xs text-muted">该子页签暂未开放。</p>
     </div>
   );
 }

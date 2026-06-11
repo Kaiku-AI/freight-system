@@ -63,8 +63,8 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             运
           </span>
           <span className="leading-tight">
-            <span className="block text-base font-semibold text-ink">海运出口订舱</span>
-            <span className="block text-[11px] text-muted">Sea Freight Export</span>
+            <span className="block text-base font-semibold text-ink">国际货运代理</span>
+            <span className="block text-[11px] text-muted">海运进出口业务平台</span>
           </span>
         </Link>
 
