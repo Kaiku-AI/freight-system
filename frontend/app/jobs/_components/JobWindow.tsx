@@ -82,7 +82,7 @@ export default function JobWindow({
       </div>
 
       {toolbar && (
-        <div className="flex items-center gap-1 overflow-x-auto border-b border-[#f5c98e] bg-accent-soft px-2 py-1">
+        <div className="relative z-10 flex items-center gap-1 overflow-x-auto overflow-y-visible border-b border-[#f5c98e] bg-accent-soft px-2 py-1">
           {toolbar}
         </div>
       )}

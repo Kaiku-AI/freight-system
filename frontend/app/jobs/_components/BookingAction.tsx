@@ -13,8 +13,22 @@ export default function BookingAction() {
   const [open, setOpen] = useState(false);
   const [phase, setPhase] = useState<Phase | null>(null);
   const [hint, setHint] = useState("");
+  const [menuPos, setMenuPos] = useState({ top: 0, left: 0 });
+  const [hintPos, setHintPos] = useState({ top: 0, left: 0 });
   const ref = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
   const bookingTimer = useRef<number | null>(null);
+
+  function updatePopoverPosition() {
+    const rect = buttonRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    const pos = {
+      top: rect.bottom + 4,
+      left: rect.left,
+    };
+    setMenuPos(pos);
+    setHintPos(pos);
+  }
 
   // 点菜单外关闭。
   useEffect(() => {
@@ -25,6 +39,17 @@ export default function BookingAction() {
     document.addEventListener("mousedown", onDoc);
     return () => document.removeEventListener("mousedown", onDoc);
   }, [open]);
+
+  useEffect(() => {
+    if (!open && !hint) return;
+    updatePopoverPosition();
+    window.addEventListener("scroll", updatePopoverPosition, true);
+    window.addEventListener("resize", updatePopoverPosition);
+    return () => {
+      window.removeEventListener("scroll", updatePopoverPosition, true);
+      window.removeEventListener("resize", updatePopoverPosition);
+    };
+  }, [open, hint]);
 
   // 「暂不可用」提示 1.8s 自动消失。
   useEffect(() => {
@@ -49,27 +74,35 @@ export default function BookingAction() {
   function pick(action: string) {
     if (action === "订舱") return startBooking();
     setOpen(false);
+    updatePopoverPosition();
     setHint(`「${action}」暂不可用`);
   }
 
   return (
-    <div ref={ref} className="relative">
+    <div ref={ref} className="relative z-30">
       <button
+        ref={buttonRef}
         type="button"
-        onClick={() => setOpen((o) => !o)}
-        className="rounded px-2 py-1 text-[13px] leading-5 whitespace-nowrap text-body transition-colors hover:bg-canvas hover:text-brand"
+        onClick={() => {
+          updatePopoverPosition();
+          setOpen((o) => !o);
+        }}
+        className="rounded px-2 py-1 text-[13px] leading-5 font-medium whitespace-nowrap text-accent transition-colors hover:bg-white hover:text-accent"
       >
         动作 ▾
       </button>
 
       {open && (
-        <div className="absolute top-full left-0 z-20 mt-1 w-36 overflow-hidden rounded border border-line-strong bg-white py-1 shadow-lg">
+        <div
+          className="fixed z-50 w-36 overflow-hidden rounded border border-line-strong bg-white py-1 shadow-lg"
+          style={menuPos}
+        >
           {ACTIONS.map((a) => (
             <button
               key={a}
               type="button"
               onClick={() => pick(a)}
-              className="block w-full px-3 py-1.5 text-left text-sm text-body transition-colors hover:bg-brand-soft hover:text-brand"
+              className="block w-full px-3 py-1.5 text-left text-sm text-body transition-colors hover:bg-accent-soft hover:text-accent"
             >
               {a}
             </button>
@@ -78,7 +111,10 @@ export default function BookingAction() {
       )}
 
       {hint && (
-        <div className="absolute top-full left-0 z-20 mt-1 rounded bg-ink px-3 py-1.5 text-xs whitespace-nowrap text-white shadow">
+        <div
+          className="fixed z-50 rounded bg-ink px-3 py-1.5 text-xs whitespace-nowrap text-white shadow"
+          style={hintPos}
+        >
           {hint}
         </div>
       )}
